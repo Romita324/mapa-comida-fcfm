@@ -452,7 +452,7 @@ export default function App() {
         </div>
       ) : (
         // Browser / Full screen layout
-        <div className="w-full min-h-screen flex flex-col">
+        <div className="w-full h-screen flex flex-col overflow-hidden">
           {appContent}
         </div>
       )}

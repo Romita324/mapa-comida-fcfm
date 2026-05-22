@@ -15,12 +15,70 @@ export default function Navbar({
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const unreadNotificationsCount = notifications.filter(n => !n.read).length;
 
+  const notificationDrawer = isNotificationsOpen && (
+    <div className="absolute right-0 mt-3 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-4 z-[9999] text-slate-800 dark:text-slate-100 animate-scale-up">
+      <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-850 pb-2 mb-3">
+        <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Notificaciones</h3>
+        {unreadNotificationsCount > 0 && (
+          <button 
+            onClick={() => {
+              setNotifications(prev => prev.map(n => ({...n, read: true})));
+            }}
+            className="text-[10px] text-emerald-500 hover:text-emerald-400 font-bold"
+          >
+            Marcar leídas
+          </button>
+        )}
+      </div>
+      
+      <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1 scrollbar-thin">
+        {notifications.map(n => (
+          <div 
+            key={n.id} 
+            className={`p-2.5 rounded-xl border text-[11px] leading-snug transition-colors ${
+              n.read 
+                ? 'bg-slate-50 dark:bg-slate-950 border-slate-150 dark:border-slate-900 opacity-60' 
+                : 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/60'
+            }`}
+          >
+            <div className="flex justify-between font-bold text-slate-700 dark:text-slate-200">
+              <span>{n.titulo}</span>
+              <span className="text-[8px] text-slate-400 font-mono font-medium">{n.fecha}</span>
+            </div>
+            <p className="text-slate-500 dark:text-slate-400 mt-0.5">{n.mensaje}</p>
+          </div>
+        ))}
+        {notifications.length === 0 && (
+          <p className="text-xs text-slate-400 italic text-center py-6">Sin notificaciones.</p>
+        )}
+      </div>
+
+      <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-850 flex flex-col gap-2">
+        <button
+          onClick={() => {
+            setIsNotificationsOpen(false);
+            onOpenMonthlySummary();
+          }}
+          className="text-xs w-full py-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold rounded-xl text-center shadow-lg transition-colors flex items-center justify-center space-x-1"
+        >
+          <span>🏆 Resumen de Reseñas Útiles</span>
+        </button>
+        <button
+          onClick={() => setIsNotificationsOpen(false)}
+          className="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold py-1 text-center"
+        >
+          Cerrar panel
+        </button>
+      </div>
+    </div>
+  );
+
   return (
-    <nav className="w-full bg-white dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-3 shadow-md z-[2000] sticky top-0 backdrop-blur-md transition-colors duration-200 shrink-0">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <nav className="w-full bg-white dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-2.5 shadow-md z-[2000] sticky top-0 backdrop-blur-md transition-colors duration-200 shrink-0">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-2.5">
         
-        {/* Brand / Logo */}
-        <div className="flex items-center justify-between">
+        {/* Brand, Logo & Mobile Controls */}
+        <div className="flex items-center justify-between w-full md:w-auto">
           <div 
             className="flex items-center space-x-2.5 cursor-pointer select-none" 
             onClick={() => setActiveView('comensal')}
@@ -41,27 +99,44 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Quick controls on mobile size */}
+          {/* Quick controls on mobile size (Theme & Bell) */}
           <div className="flex items-center space-x-2 md:hidden">
             {/* Theme switcher */}
             <button 
               onClick={() => setTheme(theme === 'dark' ? 'light' : theme === 'light' ? 'system' : 'dark')}
-              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs"
+              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 text-xs shrink-0"
+              title="Cambiar Tema"
             >
               {theme === 'light' ? '☀️' : theme === 'dark' ? '🌙' : '💻'}
             </button>
+
+            {/* Notification Bell (Mobile) */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className="p-2 rounded-xl border border-slate-200 dark:border-slate-850 hover:bg-slate-100 dark:hover:bg-slate-950 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors relative shrink-0"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4 h-4">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                </svg>
+                {unreadNotificationsCount > 0 && (
+                  <span className="absolute top-1 right-1 flex h-1.5 w-1.5 rounded-full bg-emerald-500 ring-1 ring-white dark:ring-slate-900"></span>
+                )}
+              </button>
+              {notificationDrawer}
+            </div>
           </div>
         </div>
 
         {/* Global Controls & Roles Selectors */}
-        <div className="flex flex-wrap items-center justify-between md:justify-end gap-3">
+        <div className="flex flex-col md:flex-row items-center gap-2.5 w-full md:w-auto">
           
           {/* USER PROFILE SELECTOR TAB */}
-          <div className="flex flex-wrap items-center bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 gap-0.5">
+          <div className="flex overflow-x-auto md:flex-wrap items-center bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 gap-0.5 w-full md:w-auto scrollbar-none">
             {/* Comensal */}
             <button
               onClick={() => setActiveView('comensal')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 shrink-0 ${
                 activeView === 'comensal'
                   ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
@@ -76,7 +151,7 @@ export default function Navbar({
             {/* Vendedor */}
             <button
               onClick={() => setActiveView('vendedor')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 shrink-0 ${
                 activeView === 'vendedor'
                   ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
@@ -91,7 +166,7 @@ export default function Navbar({
             {/* Administrador */}
             <button
               onClick={() => setActiveView('admin')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 relative ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 shrink-0 relative ${
                 activeView === 'admin'
                   ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
@@ -112,9 +187,9 @@ export default function Navbar({
             {/* Invitado */}
             <button
               onClick={() => setActiveView('invitado')}
-              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 ${
+              className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 shrink-0 ${
                 activeView === 'invitado'
-                  ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
+                  ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-450 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
@@ -126,127 +201,72 @@ export default function Navbar({
             </button>
           </div>
 
-          {/* SIMULATOR SWITCH PILL */}
-          <div className="hidden sm:flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
-            <button
-              onClick={() => setDeviceMode('browser')}
-              className={`px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all ${
-                deviceMode === 'browser' 
-                  ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm' 
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-              }`}
-            >
-              Pantalla
-            </button>
-            <button
-              onClick={() => setDeviceMode('mobile')}
-              className={`px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all ${
-                deviceMode === 'mobile' 
-                  ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm' 
-                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-              }`}
-            >
-              Móvil
-            </button>
-          </div>
+          {/* Right Action pills shown ONLY on desktop/tablet */}
+          <div className="hidden md:flex items-center gap-3">
+            {/* SIMULATOR SWITCH PILL */}
+            <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+              <button
+                onClick={() => setDeviceMode('browser')}
+                className={`px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all ${
+                  deviceMode === 'browser' 
+                    ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm' 
+                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                }`}
+              >
+                Pantalla
+              </button>
+              <button
+                onClick={() => setDeviceMode('mobile')}
+                className={`px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all ${
+                  deviceMode === 'mobile' 
+                    ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-450 shadow-sm' 
+                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                }`}
+              >
+                Móvil
+              </button>
+            </div>
 
-          {/* THEME CONTROL PILL */}
-          <div className="hidden sm:flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
-            <button 
-              onClick={() => setTheme('light')} 
-              className={`p-1.5 rounded-lg transition-all ${theme === 'light' ? 'bg-white dark:bg-slate-900 text-amber-500 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
-              title="Modo Claro"
-            >
-              ☀️
-            </button>
-            <button 
-              onClick={() => setTheme('dark')} 
-              className={`p-1.5 rounded-lg transition-all ${theme === 'dark' ? 'bg-white dark:bg-slate-900 text-indigo-500 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
-              title="Modo Oscuro"
-            >
-              🌙
-            </button>
-            <button 
-              onClick={() => setTheme('system')} 
-              className={`p-1.5 rounded-lg transition-all ${theme === 'system' ? 'bg-white dark:bg-slate-900 text-emerald-500 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
-              title="Automático / Dispositivo"
-            >
-              💻
-            </button>
-          </div>
+            {/* THEME CONTROL PILL */}
+            <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+              <button 
+                onClick={() => setTheme('light')} 
+                className={`p-1.5 rounded-lg transition-all ${theme === 'light' ? 'bg-white dark:bg-slate-900 text-amber-500 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                title="Modo Claro"
+              >
+                ☀️
+              </button>
+              <button 
+                onClick={() => setTheme('dark')} 
+                className={`p-1.5 rounded-lg transition-all ${theme === 'dark' ? 'bg-white dark:bg-slate-900 text-indigo-500 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                title="Modo Oscuro"
+              >
+                🌙
+              </button>
+              <button 
+                onClick={() => setTheme('system')} 
+                className={`p-1.5 rounded-lg transition-all ${theme === 'system' ? 'bg-white dark:bg-slate-900 text-emerald-500 shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'}`}
+                title="Automático / Dispositivo"
+              >
+                💻
+              </button>
+            </div>
 
-          {/* NOTIFICATION BELL WITH DRAWER */}
-          <div className="relative">
-            <button 
-              onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-              className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-850 hover:bg-slate-100 dark:hover:bg-slate-950 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors relative shrink-0"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4.5 h-4.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-              </svg>
-              {unreadNotificationsCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900"></span>
-              )}
-            </button>
-
-            {/* Notification Drawer */}
-            {isNotificationsOpen && (
-              <div className="absolute right-0 mt-3 w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl p-4 z-[9999] text-slate-800 dark:text-slate-100 animate-scale-up">
-                <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-850 pb-2 mb-3">
-                  <h3 className="text-xs font-extrabold uppercase tracking-wider text-slate-400">Notificaciones</h3>
-                  {unreadNotificationsCount > 0 && (
-                    <button 
-                      onClick={() => {
-                        setNotifications(prev => prev.map(n => ({...n, read: true})));
-                      }}
-                      className="text-[10px] text-emerald-500 hover:text-emerald-400 font-bold"
-                    >
-                      Marcar leídas
-                    </button>
-                  )}
-                </div>
-                
-                <div className="flex flex-col gap-2 max-h-60 overflow-y-auto pr-1 scrollbar-thin">
-                  {notifications.map(n => (
-                    <div 
-                      key={n.id} 
-                      className={`p-2.5 rounded-xl border text-[11px] leading-snug transition-colors ${
-                        n.read 
-                          ? 'bg-slate-50 dark:bg-slate-950 border-slate-150 dark:border-slate-900 opacity-60' 
-                          : 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/60'
-                      }`}
-                    >
-                      <div className="flex justify-between font-bold text-slate-700 dark:text-slate-200">
-                        <span>{n.titulo}</span>
-                        <span className="text-[8px] text-slate-400 font-mono font-medium">{n.fecha}</span>
-                      </div>
-                      <p className="text-slate-500 dark:text-slate-400 mt-0.5">{n.mensaje}</p>
-                    </div>
-                  ))}
-                  {notifications.length === 0 && (
-                    <p className="text-xs text-slate-400 italic text-center py-6">Sin notificaciones.</p>
-                  )}
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-850 flex flex-col gap-2">
-                  <button
-                    onClick={() => {
-                      setIsNotificationsOpen(false);
-                      onOpenMonthlySummary();
-                    }}
-                    className="text-xs w-full py-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-bold rounded-xl text-center shadow-lg transition-colors flex items-center justify-center space-x-1"
-                  >
-                    <span>🏆 Resumen de Reseñas Útiles</span>
-                  </button>
-                  <button
-                    onClick={() => setIsNotificationsOpen(false)}
-                    className="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 font-bold py-1 text-center"
-                  >
-                    Cerrar panel
-                  </button>
-                </div>
-              </div>
-            )}
+            {/* NOTIFICATION BELL WITH DRAWER (Desktop) */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-850 hover:bg-slate-100 dark:hover:bg-slate-950 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors relative shrink-0"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4.5 h-4.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                </svg>
+                {unreadNotificationsCount > 0 && (
+                  <span className="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900"></span>
+                )}
+              </button>
+              {notificationDrawer}
+            </div>
           </div>
 
         </div>
