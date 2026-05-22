@@ -47,15 +47,15 @@ export default function AdminView({
         
         {/* KPI metrics */}
         <div className="flex gap-3">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-855 rounded-xl px-3.5 py-2 flex flex-col justify-center min-w-24 shadow-sm transition-colors">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 flex flex-col justify-center min-w-24 shadow-sm transition-colors">
             <span className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Reportes</span>
             <span className="text-base font-extrabold text-rose-500 font-mono mt-0.5">{pendingReports.length}</span>
           </div>
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-855 rounded-xl px-3.5 py-2 flex flex-col justify-center min-w-24 shadow-sm transition-colors">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 flex flex-col justify-center min-w-24 shadow-sm transition-colors">
             <span className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Locales Pen.</span>
             <span className="text-base font-extrabold text-amber-500 font-mono mt-0.5">{pendingLocales.length}</span>
           </div>
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-855 rounded-xl px-3.5 py-2 flex flex-col justify-center min-w-24 shadow-sm transition-colors">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3.5 py-2 flex flex-col justify-center min-w-24 shadow-sm transition-colors">
             <span className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Auditorías</span>
             <span className="text-base font-extrabold text-emerald-500 font-mono mt-0.5">{logAuditoriaAdmin.length}</span>
           </div>
@@ -63,7 +63,7 @@ export default function AdminView({
       </div>
 
       {/* ADMIN TABS NAVIGATION */}
-      <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-2xl border border-slate-200 dark:border-slate-850 gap-0.5 shrink-0">
+      <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 gap-0.5 shrink-0">
         <button 
           onClick={() => setAdminTab('reportes')}
           className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold transition-all relative ${
@@ -123,7 +123,7 @@ export default function AdminView({
             <div className="lg:col-span-7 flex flex-col gap-3">
               <div className="flex items-center space-x-2 px-1">
                 <div className="h-2 w-2 rounded-full bg-rose-500 animate-pulse"></div>
-                <h3 className="text-[10px] font-extrabold text-slate-450 dark:text-slate-500 uppercase tracking-widest">
+                <h3 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                   Denuncias de Comentarios Pendientes
                 </h3>
               </div>
@@ -135,7 +135,7 @@ export default function AdminView({
 
                   return (
                     <div key={report.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow flex flex-col gap-3 transition-colors">
-                      <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-850 pb-2">
+                      <div className="flex justify-between items-start border-b border-slate-100 dark:border-slate-800 pb-2">
                         <div>
                           <span className="text-[8px] bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60 px-2 py-0.5 rounded font-black uppercase font-mono">
                             {report.motivo || 'Reporte de Comensal'}
@@ -150,7 +150,7 @@ export default function AdminView({
                       </div>
 
                       {review ? (
-                        <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-850 flex flex-col gap-1.5 transition-colors">
+                        <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col gap-1.5 transition-colors">
                           <div className="flex justify-between items-center text-xs">
                             <span className="font-bold text-slate-700 dark:text-slate-300 font-mono">@{review.usuario}</span>
                             <span className="text-amber-500 font-mono text-[9px]">
@@ -158,12 +158,12 @@ export default function AdminView({
                               {'☆'.repeat(5 - review.calificacion)}
                             </span>
                           </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-450 italic leading-relaxed">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 italic leading-relaxed">
                             "{review.comentario}"
                           </p>
                         </div>
                       ) : (
-                        <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-850 text-xs text-rose-500 italic transition-colors">
+                        <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-xs text-rose-500 italic transition-colors">
                           La reseña asociada ya fue eliminada o no se encuentra disponible.
                         </div>
                       )}
@@ -171,7 +171,7 @@ export default function AdminView({
                       <div className="flex justify-end gap-2 pt-1">
                         <button
                           onClick={() => onResolveReport(report.id, 'descartar', review?.id, review?.usuario)}
-                          className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-805 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-xs transition-colors"
+                          className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-xs transition-colors"
                         >
                           Descartar Reporte
                         </button>
@@ -201,7 +201,7 @@ export default function AdminView({
                 <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
                 </svg>
-                <h3 className="text-[10px] font-extrabold text-slate-450 dark:text-slate-500 uppercase tracking-widest">
+                <h3 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                   Log de Auditoría Inmutable
                 </h3>
               </div>
@@ -234,7 +234,7 @@ export default function AdminView({
           <div className="flex flex-col gap-3">
             <div className="flex items-center space-x-2 px-1">
               <div className="h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse"></div>
-              <h3 className="text-[10px] font-extrabold text-slate-450 dark:text-slate-500 uppercase tracking-widest">
+              <h3 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                 Solicitudes de Nuevos Vendedores
               </h3>
             </div>
@@ -242,9 +242,9 @@ export default function AdminView({
             <div className="flex flex-col gap-3">
               {pendingLocales.map(req => (
                 <div key={req.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow flex flex-col gap-3 transition-colors">
-                  <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-850 pb-2">
+                  <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
                     <div>
-                      <span className="text-[8px] bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border border-amber-250 dark:border-amber-900 px-2.5 py-0.5 rounded font-black uppercase font-mono">
+                      <span className="text-[8px] bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900 px-2.5 py-0.5 rounded font-black uppercase font-mono">
                         Petición de Vendedor
                       </span>
                       <h4 className="text-xs font-black text-slate-800 dark:text-slate-200 mt-2">{req.nombre}</h4>
@@ -253,13 +253,13 @@ export default function AdminView({
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-850 transition-colors">
+                    <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
                       <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Ubicación Coordinadas</span>
                       <p className="font-mono text-slate-600 dark:text-slate-350">{req.coordenadas[0].toFixed(5)}, {req.coordenadas[1].toFixed(5)}</p>
                       <p className="text-[9px] text-emerald-500 font-bold mt-1">Acepta JUNAEB: {req.aceptaJunaeb ? 'Sí' : 'No'}</p>
                     </div>
 
-                    <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-850 transition-colors">
+                    <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
                       <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Menú Inicial Declarado</span>
                       <div className="flex flex-col gap-1 max-h-20 overflow-y-auto">
                         {req.menu.map((menuItem, idx) => (
@@ -272,10 +272,10 @@ export default function AdminView({
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-2 pt-1 border-t border-slate-100 dark:border-slate-850">
+                  <div className="flex justify-end gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
                     <button
                       onClick={() => onRejectLocal(req.id)}
-                      className="px-3.5 py-1.5 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-805 text-rose-500 font-bold rounded-xl text-xs transition-colors"
+                      className="px-3.5 py-1.5 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800 text-rose-500 font-bold rounded-xl text-xs transition-colors"
                     >
                       Rechazar Ingreso
                     </button>
@@ -304,7 +304,7 @@ export default function AdminView({
           <div className="flex flex-col gap-3">
             <div className="flex items-center space-x-2 px-1">
               <div className="h-2.5 w-2.5 rounded-full bg-teal-500 animate-pulse"></div>
-              <h3 className="text-[10px] font-extrabold text-slate-450 dark:text-slate-500 uppercase tracking-widest">
+              <h3 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                 Postulaciones de Comensales a Moderadores
               </h3>
             </div>
@@ -312,7 +312,7 @@ export default function AdminView({
             <div className="flex flex-col gap-3">
               {pendingMods.map(app => (
                 <div key={app.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow flex flex-col gap-3 transition-colors">
-                  <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-850 pb-2">
+                  <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
                     <div>
                       <span className="text-[8px] bg-teal-100 dark:bg-teal-950 text-teal-800 dark:text-teal-400 border border-teal-200 dark:border-teal-900/60 px-2.5 py-0.5 rounded font-black uppercase font-mono">
                         Postulación Moderador
@@ -324,17 +324,17 @@ export default function AdminView({
                     <span className="text-[10px] text-slate-400 font-mono font-bold">RUT: {app.rut}</span>
                   </div>
 
-                  <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-850 transition-colors">
+                  <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Carta de Motivación</span>
                     <p className="text-xs text-slate-600 dark:text-slate-350 italic font-medium leading-relaxed">
                       "{app.motivacion}"
                     </p>
                   </div>
 
-                  <div className="flex justify-end gap-2 pt-1 border-t border-slate-100 dark:border-slate-850">
+                  <div className="flex justify-end gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
                     <button
                       onClick={() => onRejectModerador(app.id)}
-                      className="px-3.5 py-1.5 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-805 text-rose-500 font-bold rounded-xl text-xs transition-colors"
+                      className="px-3.5 py-1.5 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800 text-rose-500 font-bold rounded-xl text-xs transition-colors"
                     >
                       Rechazar Solicitud
                     </button>

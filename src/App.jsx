@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import ComensalView from './components/ComensalView';
 import VendedorView from './components/VendedorView';
 import AdminView from './components/AdminView';
+import ProfileDrawer from './components/ProfileDrawer';
 
 // Import initial database mocks
 import { 
@@ -28,6 +29,7 @@ export default function App() {
   const [solicitudesVendedor, setSolicitudesVendedor] = useState([]);
   const [solicitudesModerador, setSolicitudesModerador] = useState([]);
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Simulated notifications
   const [notifications, setNotifications] = useState([
@@ -342,9 +344,10 @@ export default function App() {
         notifications={notifications}
         setNotifications={setNotifications}
         onOpenMonthlySummary={() => setIsSummaryOpen(true)}
+        onOpenProfile={() => setIsProfileOpen(true)}
       />
 
-      <main className="flex-1 w-full overflow-hidden relative">
+      <main className="flex-1 w-full flex flex-col min-h-0 relative">
         {/* COMENSAL VIEW (also used for guest view with isGuest set) */}
         {activeView === 'comensal' && (
           <ComensalView 
@@ -353,9 +356,8 @@ export default function App() {
             onReportReview={handleReportReview}
             favoritos={favoritos}
             onToggleFavorite={handleToggleFavorite}
-            onPostularModerador={handlePostularModerador}
-            solicitudesModerador={solicitudesModerador}
             isGuest={false}
+            theme={theme}
           />
         )}
 
@@ -367,9 +369,8 @@ export default function App() {
             onReportReview={handleReportReview}
             favoritos={[]}
             onToggleFavorite={handleToggleFavorite}
-            onPostularModerador={handlePostularModerador}
-            solicitudesModerador={solicitudesModerador}
             isGuest={true}
+            theme={theme}
           />
         )}
         
@@ -378,8 +379,6 @@ export default function App() {
           <VendedorView 
             locales={localesList} 
             onUpdateLocalStatus={handleUpdateLocalStatus}
-            solicitudesVendedor={solicitudesVendedor}
-            onRegisterNewLocal={handleRegisterNewLocal}
           />
         )}
         
@@ -404,6 +403,21 @@ export default function App() {
       <footer className="w-full py-3 px-6 text-center text-[10px] text-slate-400 dark:text-slate-500 font-mono bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-900 shrink-0">
         &copy; {new Date().getFullYear()} Beauchef Eats - DCC FCFM. Prototipo V2.
       </footer>
+
+      {/* Unified User Profile Drawer */}
+      <ProfileDrawer 
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        activeView={activeView}
+        solicitudesModerador={solicitudesModerador}
+        onPostularModerador={handlePostularModerador}
+        solicitudesVendedor={solicitudesVendedor}
+        onRegisterNewLocal={handleRegisterNewLocal}
+        locales={localesList}
+        reseñas={reseñasList}
+        reportesList={reportesList}
+        favoritos={favoritos}
+      />
     </div>
   );
 

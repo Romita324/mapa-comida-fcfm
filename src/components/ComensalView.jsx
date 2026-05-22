@@ -19,8 +19,6 @@ export default function ComensalView({
   onReportReview,
   favoritos,
   onToggleFavorite,
-  onPostularModerador,
-  solicitudesModerador,
   isGuest,
   theme
 }) {
@@ -32,16 +30,7 @@ export default function ComensalView({
   const [mapCenter, setMapCenter] = useState([-33.4581, -70.6642]); // FCFM center
   const [mobileTab, setMobileTab] = useState('mapa'); // 'mapa' | 'lista'
 
-  // Moderator form fields
-  const [isModFormOpen, setIsModFormOpen] = useState(false);
-  const [rut, setRut] = useState('');
-  const [motivacion, setMotivacion] = useState('');
 
-  // Extract unique categories for filter
-  const categories = ['All', ...new Set(locales.map(l => l.categoria))];
-
-  // Check if current comensal has already applied
-  const currentApp = solicitudesModerador.find(app => app.usuario === 'comensal_fcfm');
 
   // Apply filters
   const filteredLocales = locales.filter(local => {
@@ -93,25 +82,14 @@ export default function ComensalView({
     });
   };
 
+  // Extract unique categories for filter
+  const categories = ['All', ...new Set(locales.map(l => l.categoria))];
+
   const handleSelectLocal = (local) => {
     setSelectedLocal(local);
     setMapCenter(local.coordenadas);
     setMobileTab('mapa');
   };
-
-  const handleModSubmit = (e) => {
-    e.preventDefault();
-    if (!rut.trim() || !motivacion.trim()) return;
-
-    onPostularModerador({
-      usuario: 'comensal_fcfm',
-      rut,
-      motivacion
-    });
-    setRut('');
-    setMotivacion('');
-  };
-
   // Determine dynamic Leaflet tile layer URL based on active theme
   // We'll force updates by checking if dark class exists on document
   const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -120,16 +98,16 @@ export default function ComensalView({
     : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
 
   return (
-    <div className="w-full h-full p-4 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 overflow-hidden transition-colors duration-200">
+    <div className="w-full flex-1 min-h-0 p-4 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 overflow-hidden transition-colors duration-200">
       
       {/* Tab Switcher for Mobile */}
-      <div className="flex lg:hidden bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-850 w-full shrink-0 mb-1">
+      <div className="flex lg:hidden bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 w-full shrink-0 mb-1">
         <button
           onClick={() => setMobileTab('mapa')}
           className={`flex-1 flex items-center justify-center space-x-2 py-2 rounded-lg text-xs font-bold transition-all ${
             mobileTab === 'mapa'
-              ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-450 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-250'
+              ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
         >
           <span>🗺️ Ver Mapa</span>
@@ -138,8 +116,8 @@ export default function ComensalView({
           onClick={() => setMobileTab('lista')}
           className={`flex-1 flex items-center justify-center space-x-2 py-2 rounded-lg text-xs font-bold transition-all ${
             mobileTab === 'lista'
-              ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-450 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-250'
+              ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
         >
           <span>🏪 Ver Locales</span>
@@ -147,9 +125,9 @@ export default function ComensalView({
       </div>
 
       {/* LEFT COLUMN: Filters, Favoritos & List */}
-      <div className={`w-full lg:w-96 flex-col gap-4 overflow-y-auto pr-1 select-none scrollbar-thin shrink-0 ${
-        mobileTab === 'lista' ? 'flex flex-1 h-full' : 'hidden lg:flex'
-      }`}>
+      <div className={`w-full gap-4 overflow-y-auto pr-1 select-none scrollbar-thin ${
+        mobileTab === 'lista' ? 'flex flex-1 h-full' : 'hidden'
+      } lg:flex lg:flex-col lg:w-96 lg:h-full lg:flex-none`}>
         
         {/* Guest Warning Card */}
         {isGuest && (
@@ -166,7 +144,7 @@ export default function ComensalView({
 
         {/* Filters Box */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col gap-4 transition-colors">
-          <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-850 pb-3">
+          <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
             <h2 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">Filtros de Búsqueda</h2>
             <button 
               onClick={() => { setFilterJunaeb(false); setFilterCategory('All'); setMaxDistance(3.0); setFilterFavorites(false); }}
@@ -187,7 +165,7 @@ export default function ComensalView({
                   className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                     filterCategory === cat
                       ? 'bg-slate-900 dark:bg-slate-100 border-slate-900 dark:border-slate-100 text-white dark:text-slate-950 font-black'
-                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-850 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                   }`}
                 >
                   {cat === 'All' ? 'Todas' : cat}
@@ -221,7 +199,7 @@ export default function ComensalView({
           {/* Junaeb and Favorites Toggles */}
           <div className="flex flex-col gap-2.5">
             {/* JUNAEB Toggle */}
-            <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-850 transition-colors">
+            <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
               <div className="flex items-center space-x-2">
                 <span className="flex h-5 w-5 items-center justify-center rounded bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-900 text-[10px] font-black text-emerald-600 dark:text-emerald-400">J</span>
                 <div>
@@ -235,13 +213,13 @@ export default function ComensalView({
                   onChange={(e) => setFilterJunaeb(e.target.checked)}
                   className="sr-only peer" 
                 />
-                <div className="w-8 h-4.5 bg-slate-200 dark:bg-slate-850 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-emerald-500 peer-checked:after:bg-slate-950 peer-checked:after:border-slate-950"></div>
+                <div className="w-8 h-4.5 bg-slate-200 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-emerald-500 peer-checked:after:bg-slate-950 peer-checked:after:border-slate-950"></div>
               </label>
             </div>
 
             {/* FAVORITES Toggle */}
             {!isGuest && (
-              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-850 transition-colors">
+              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
                 <div className="flex items-center space-x-2">
                   <span className="flex h-5 w-5 items-center justify-center rounded bg-rose-100 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-900 text-[10px] font-black text-rose-600 dark:text-rose-400">❤️</span>
                   <div>
@@ -255,74 +233,16 @@ export default function ComensalView({
                     onChange={(e) => setFilterFavorites(e.target.checked)}
                     className="sr-only peer" 
                   />
-                  <div className="w-8 h-4.5 bg-slate-200 dark:bg-slate-850 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-rose-500 peer-checked:after:bg-slate-950 peer-checked:after:border-slate-950"></div>
+                  <div className="w-8 h-4.5 bg-slate-200 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-rose-500 peer-checked:after:bg-slate-950 peer-checked:after:border-slate-950"></div>
                 </label>
               </div>
             )}
           </div>
         </div>
 
-        {/* MODERATOR APPLICATION WIDGET */}
-        {!isGuest && (
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-lg transition-colors">
-            {currentApp ? (
-              <div>
-                <span className="text-[8px] uppercase tracking-wider font-mono font-bold bg-amber-100 dark:bg-amber-950/40 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-900 px-2 py-0.5 rounded">
-                  Postulación: {currentApp?.estado || 'Enviada'}
-                </span>
-                <p className="text-xs text-slate-500 dark:text-slate-450 mt-2 font-medium">
-                  Has enviado tu postulación para moderar el foro anti-troll. Un administrador auditará tu solicitud de inmediato.
-                </p>
-              </div>
-            ) : (
-              <div>
-                <button
-                  onClick={() => setIsModFormOpen(!isModFormOpen)}
-                  className="w-full text-left flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-emerald-500 dark:hover:text-emerald-400 transition-colors"
-                >
-                  <span>🛡️ Postulación a Moderador</span>
-                  <span>{isModFormOpen ? '▲' : '▼'}</span>
-                </button>
-                {isModFormOpen && (
-                  <form onSubmit={handleModSubmit} className="mt-3 flex flex-col gap-2 animate-fade-in">
-                    <div>
-                      <label className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">RUT / Identificador</label>
-                      <input 
-                        type="text" 
-                        required
-                        value={rut}
-                        onChange={(e) => setRut(e.target.value)}
-                        placeholder="12.345.678-9"
-                        className="w-full text-xs p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 focus:outline-none focus:border-emerald-500 text-slate-700 dark:text-slate-200"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[9px] text-slate-400 uppercase tracking-widest font-bold">Motivo (Breve)</label>
-                      <textarea 
-                        required
-                        value={motivacion}
-                        onChange={(e) => setMotivacion(e.target.value)}
-                        placeholder="¿Por qué deseas ser moderador?"
-                        rows={2}
-                        className="w-full text-xs p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 focus:outline-none focus:border-emerald-500 text-slate-700 dark:text-slate-200"
-                      />
-                    </div>
-                    <button
-                      type="submit"
-                      className="w-full py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold rounded-xl text-xs shadow-md transition-opacity hover:opacity-95"
-                    >
-                      Enviar Solicitud
-                    </button>
-                  </form>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
         {/* Locales List */}
         <div className="flex flex-col gap-2">
-          <p className="text-[10px] font-extrabold text-slate-450 dark:text-slate-550 px-1 font-mono uppercase tracking-wider">
+          <p className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 px-1 font-mono uppercase tracking-wider">
             Locales Encontrados: {filteredLocales.length}
           </p>
           <div className="flex flex-col gap-2">
@@ -336,7 +256,7 @@ export default function ComensalView({
                   className={`p-3.5 rounded-2xl border cursor-pointer transition-all duration-150 flex flex-col gap-2 relative ${
                     selectedLocal?.id === local.id
                       ? 'bg-slate-100 dark:bg-slate-900 border-emerald-500 shadow-md'
-                      : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-750'
+                      : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                   }`}
                 >
                   {/* Favorite mini heart */}
@@ -351,16 +271,16 @@ export default function ComensalView({
                     </div>
                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide shrink-0 ${
                       local.estadoServicio === 'Abierto'
-                        ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-450 border border-emerald-200 dark:border-emerald-900'
+                        ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900'
                         : local.estadoServicio === 'Sin Stock'
-                        ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-450 border border-amber-200 dark:border-amber-900'
-                        : 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-450 border border-rose-200 dark:border-rose-900'
+                        ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900'
+                        : 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-400 border border-rose-200 dark:border-rose-900'
                     }`}>
                       {local.estadoServicio}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center mt-0.5 pt-2 border-t border-slate-100 dark:border-slate-850 text-[10px] text-slate-400 dark:text-slate-550 font-bold">
+                  <div className="flex justify-between items-center mt-0.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 dark:text-slate-500 font-bold">
                     <span className="flex items-center space-x-1 font-mono">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
@@ -391,9 +311,9 @@ export default function ComensalView({
       </div>
 
       {/* RIGHT COLUMN: Map & Detail Side-Drawer */}
-      <div className={`flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden relative shadow-xl h-full transition-colors ${
-        mobileTab === 'mapa' ? 'flex flex-1 h-full' : 'hidden lg:flex'
-      }`}>
+      <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden relative shadow-xl transition-colors ${
+        mobileTab === 'mapa' ? 'flex flex-1 h-full' : 'hidden'
+      } lg:flex lg:flex-1 lg:h-full`}>
         
         {/* Leaflet Map */}
         <div className="flex-1 h-full z-10">
@@ -468,9 +388,9 @@ export default function ComensalView({
           <div className="absolute right-0 top-0 bottom-0 w-full md:w-96 bg-white/95 dark:bg-slate-900/95 border-l border-slate-200 dark:border-slate-800 z-20 shadow-2xl p-5 overflow-y-auto flex flex-col gap-4 backdrop-blur transition-colors scrollbar-thin">
             
             {/* Drawer Header */}
-            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-850 pb-2">
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
               <div>
-                <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-950 text-[9px] font-bold text-slate-500 rounded-md border border-slate-200 dark:border-slate-850 font-mono uppercase tracking-wider">
+                <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-950 text-[9px] font-bold text-slate-500 rounded-md border border-slate-200 dark:border-slate-800 font-mono uppercase tracking-wider">
                   Detalles
                 </span>
               </div>
@@ -510,16 +430,16 @@ export default function ComensalView({
                 <h3 className="text-base font-extrabold text-slate-800 dark:text-slate-100 tracking-tight leading-tight">{selectedLocal.nombre}</h3>
                 <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide shrink-0 ${
                   selectedLocal.estadoServicio === 'Abierto'
-                    ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-450 border border-emerald-200 dark:border-emerald-900'
+                    ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900'
                     : selectedLocal.estadoServicio === 'Sin Stock'
-                    ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-450 border border-amber-200 dark:border-amber-900'
-                    : 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-450 border border-rose-200 dark:border-rose-900'
+                    ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900'
+                    : 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-400 border border-rose-200 dark:border-rose-900'
                 }`}>
                   {selectedLocal.estadoServicio}
                 </span>
               </div>
               <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1.5 font-semibold">
-                <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-950 rounded text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-850/50">{selectedLocal.categoria}</span>
+                <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-950 rounded text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-800/50">{selectedLocal.categoria}</span>
                 <span>•</span>
                 <span className="font-mono">{selectedLocal.distanciaKm} km de FCFM</span>
               </p>
@@ -534,7 +454,7 @@ export default function ComensalView({
                   </div>
                 </div>
               ) : (
-                <div className="mt-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 p-3 rounded-xl flex items-center space-x-3 transition-colors">
+                <div className="mt-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-3 rounded-xl flex items-center space-x-3 transition-colors">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-[10px] font-black text-slate-400">J</span>
                   <div>
                     <h4 className="text-xs font-bold text-slate-500">Sin Convenio JUNAEB</h4>
@@ -547,7 +467,7 @@ export default function ComensalView({
             {/* Menu Section */}
             <div className="flex flex-col gap-2">
               <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Menú Oferta</h4>
-              <div className="flex flex-col gap-1.5 bg-slate-50 dark:bg-slate-950 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-850 transition-colors">
+              <div className="flex flex-col gap-1.5 bg-slate-50 dark:bg-slate-950 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors">
                 {selectedLocal.menu && selectedLocal.menu.map((food, i) => (
                   <div key={i} className="flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-900/60 last:border-b-0">
                     <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{food.item}</span>
@@ -571,7 +491,7 @@ export default function ComensalView({
                       className={`p-3 rounded-2xl border transition-all ${
                         review.reportado 
                           ? 'bg-rose-50/50 dark:bg-rose-950/15 border-rose-200/50 dark:border-rose-900/40 opacity-75' 
-                          : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-850'
+                          : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800'
                       }`}
                     >
                       <div className="flex justify-between items-center mb-1">
