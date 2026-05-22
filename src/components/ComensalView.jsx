@@ -20,7 +20,8 @@ export default function ComensalView({
   favoritos,
   onToggleFavorite,
   isGuest,
-  theme
+  theme,
+  deviceMode
 }) {
   const [selectedLocal, setSelectedLocal] = useState(null);
   const [filterJunaeb, setFilterJunaeb] = useState(false);
@@ -29,6 +30,16 @@ export default function ComensalView({
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [mapCenter, setMapCenter] = useState([-33.4581, -70.6642]); // FCFM center
   const [mobileTab, setMobileTab] = useState('mapa'); // 'mapa' | 'lista'
+
+  // Viewport resize tracking to support desktop browser resizing alongside chassis simulated mode
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = deviceMode === 'mobile' || windowWidth < 1024;
 
 
 
@@ -98,10 +109,14 @@ export default function ComensalView({
     : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
 
   return (
-    <div className="w-full flex-1 min-h-0 p-4 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 overflow-hidden transition-colors duration-200">
+    <div className={`w-full h-full flex-1 min-h-0 transition-colors duration-200 overflow-hidden flex ${
+      isMobile ? 'flex-col p-4 gap-4' : 'flex-row p-6 gap-6'
+    }`}>
       
       {/* Tab Switcher for Mobile */}
-      <div className="flex lg:hidden bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 w-full shrink-0 mb-1">
+      <div className={`bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 w-full shrink-0 mb-1 ${
+        isMobile ? 'flex' : 'hidden'
+      }`}>
         <button
           onClick={() => setMobileTab('mapa')}
           className={`flex-1 flex items-center justify-center space-x-2 py-2 rounded-lg text-xs font-bold transition-all ${
@@ -125,9 +140,11 @@ export default function ComensalView({
       </div>
 
       {/* LEFT COLUMN: Filters, Favoritos & List */}
-      <div className={`w-full gap-4 overflow-y-auto pr-1 select-none scrollbar-thin ${
-        mobileTab === 'lista' ? 'flex flex-1 h-full' : 'hidden'
-      } lg:flex lg:flex-col lg:w-96 lg:h-full lg:flex-none`}>
+      <div className={`gap-4 overflow-y-auto pr-1 select-none scrollbar-thin ${
+        isMobile 
+          ? (mobileTab === 'lista' ? 'flex flex-col flex-1 h-full w-full' : 'hidden')
+          : 'flex flex-col w-96 h-full flex-none'
+      }`}>
         
         {/* Guest Warning Card */}
         {isGuest && (
@@ -312,11 +329,13 @@ export default function ComensalView({
 
       {/* RIGHT COLUMN: Map & Detail Side-Drawer */}
       <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden relative shadow-xl transition-colors ${
-        mobileTab === 'mapa' ? 'flex flex-1 h-full' : 'hidden'
-      } lg:flex lg:flex-1 lg:h-full`}>
+        isMobile 
+          ? (mobileTab === 'mapa' ? 'flex flex-1 h-full w-full' : 'hidden')
+          : 'flex flex-1 h-full'
+      }`}>
         
         {/* Leaflet Map */}
-        <div className="flex-1 h-full z-10">
+        <div className="w-full h-full z-10">
           <MapContainer 
             key={theme} // Force re-render of Leaflet tiles on theme change
             center={[-33.4581, -70.6642]} 
@@ -450,7 +469,7 @@ export default function ComensalView({
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-900 text-[10px] font-black text-emerald-600 dark:text-emerald-400">J</span>
                   <div>
                     <h4 className="text-xs font-bold text-emerald-700 dark:text-emerald-400">¡Convenio JUNAEB Activo!</h4>
-                    <p className="text-[10px] text-emerald-650/80 dark:text-emerald-500">Acepta pago BAES para compras de colación.</p>
+                    <p className="text-[10px] text-emerald-600/80 dark:text-emerald-500">Acepta pago BAES para compras de colación.</p>
                   </div>
                 </div>
               ) : (

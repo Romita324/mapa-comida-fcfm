@@ -332,7 +332,7 @@ export default function App() {
 
   // The application HTML structure shared between layouts
   const appContent = (
-    <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
+    <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200 relative">
       <Navbar 
         activeView={activeView} 
         setActiveView={(view) => setActiveView(view)} 
@@ -358,6 +358,7 @@ export default function App() {
             onToggleFavorite={handleToggleFavorite}
             isGuest={false}
             theme={theme}
+            deviceMode={deviceMode}
           />
         )}
 
@@ -371,6 +372,7 @@ export default function App() {
             onToggleFavorite={handleToggleFavorite}
             isGuest={true}
             theme={theme}
+            deviceMode={deviceMode}
           />
         )}
         
@@ -396,6 +398,7 @@ export default function App() {
             solicitudesModerador={solicitudesModerador}
             onApproveModerador={handleApproveModerador}
             onRejectModerador={handleRejectModerador}
+            deviceMode={deviceMode}
           />
         )}
       </main>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function AdminView({ 
   locales, 
@@ -11,8 +11,17 @@ export default function AdminView({
   onRejectLocal,
   solicitudesModerador,
   onApproveModerador,
-  onRejectModerador
+  onRejectModerador,
+  deviceMode
 }) {
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = deviceMode === 'mobile' || windowWidth < 1024;
   const [adminTab, setAdminTab] = useState('reportes'); // 'reportes' | 'locales' | 'moderadores'
 
   // Helper to find the review associated with a report
@@ -35,7 +44,9 @@ export default function AdminView({
     <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-4 h-full overflow-y-auto select-none scrollbar-thin">
       
       {/* Dashboard Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between border-b border-slate-200 dark:border-slate-800 pb-4 gap-3 shrink-0">
+      <div className={`flex border-b border-slate-200 dark:border-slate-800 pb-4 gap-3 shrink-0 ${
+        isMobile ? 'flex-col' : 'flex-row items-center justify-between'
+      }`}>
         <div>
           <h2 className="text-xl font-extrabold bg-gradient-to-r from-emerald-500 to-teal-400 dark:from-emerald-400 dark:to-teal-200 bg-clip-text text-transparent">
             Panel de Administración y Auditoría
@@ -118,9 +129,9 @@ export default function AdminView({
         
         {/* TAB 1: REPORTS AND AUDIT LOGS */}
         {adminTab === 'reportes' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          <div className={`grid gap-5 items-start ${isMobile ? 'grid-cols-1' : 'grid-cols-12'}`}>
             {/* Safety reports */}
-            <div className="lg:col-span-7 flex flex-col gap-3">
+            <div className={`${isMobile ? 'w-full' : 'col-span-7'} flex flex-col gap-3`}>
               <div className="flex items-center space-x-2 px-1">
                 <div className="h-2 w-2 rounded-full bg-rose-500 animate-pulse"></div>
                 <h3 className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
@@ -144,7 +155,7 @@ export default function AdminView({
                             Reporte ID #{report.id}
                           </h4>
                         </div>
-                        <span className="text-[10px] text-emerald-600 dark:text-emerald-450 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900/40 font-bold">
+                        <span className="text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200 dark:border-emerald-900/40 font-bold">
                           {localName}
                         </span>
                       </div>
@@ -196,7 +207,7 @@ export default function AdminView({
             </div>
 
             {/* Audit Logs Console */}
-            <div className="lg:col-span-5 flex flex-col gap-3">
+            <div className={`${isMobile ? 'w-full' : 'col-span-5'} flex flex-col gap-3`}>
               <div className="flex items-center space-x-2 px-1">
                 <svg className="w-3.5 h-3.5 text-emerald-500" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
@@ -214,7 +225,7 @@ export default function AdminView({
                         <span>[UTC] {log.fecha}</span>
                         <span className="text-emerald-500 font-bold">#AUD-{log.id}</span>
                       </div>
-                      <p className="text-slate-350 break-words leading-tight">{log.accion}</p>
+                      <p className="text-slate-300 break-words leading-tight">{log.accion}</p>
                     </div>
                   ))}
                   {logAuditoriaAdmin.length === 0 && (
@@ -255,7 +266,7 @@ export default function AdminView({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
                       <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Ubicación Coordinadas</span>
-                      <p className="font-mono text-slate-600 dark:text-slate-350">{req.coordenadas[0].toFixed(5)}, {req.coordenadas[1].toFixed(5)}</p>
+                      <p className="font-mono text-slate-600 dark:text-slate-300">{req.coordenadas[0].toFixed(5)}, {req.coordenadas[1].toFixed(5)}</p>
                       <p className="text-[9px] text-emerald-500 font-bold mt-1">Acepta JUNAEB: {req.aceptaJunaeb ? 'Sí' : 'No'}</p>
                     </div>
 
@@ -326,7 +337,7 @@ export default function AdminView({
 
                   <div className="bg-slate-50 dark:bg-slate-950 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
                     <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Carta de Motivación</span>
-                    <p className="text-xs text-slate-600 dark:text-slate-350 italic font-medium leading-relaxed">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 italic font-medium leading-relaxed">
                       "{app.motivacion}"
                     </p>
                   </div>

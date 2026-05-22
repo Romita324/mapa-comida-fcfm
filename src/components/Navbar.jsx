@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Navbar({ 
   activeView, 
@@ -13,6 +13,14 @@ export default function Navbar({
   onOpenMonthlySummary,
   onOpenProfile
 }) {
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = deviceMode === 'mobile' || windowWidth < 768;
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const unreadNotificationsCount = notifications.filter(n => !n.read).length;
 
@@ -38,7 +46,7 @@ export default function Navbar({
             key={n.id} 
             className={`p-2.5 rounded-xl border text-[11px] leading-snug transition-colors ${
               n.read 
-                ? 'bg-slate-50 dark:bg-slate-950 border-slate-150 dark:border-slate-900 opacity-60' 
+                ? 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-900 opacity-60' 
                 : 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/60'
             }`}
           >
@@ -75,11 +83,15 @@ export default function Navbar({
   );
 
   return (
-    <nav className="w-full bg-white dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 px-4 md:px-6 py-2.5 shadow-md z-[2000] sticky top-0 backdrop-blur-md transition-colors duration-200 shrink-0">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-2.5">
+    <nav className={`w-full bg-white dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 py-2.5 shadow-md z-[2000] sticky top-0 backdrop-blur-md transition-colors duration-200 shrink-0 ${
+      isMobile ? 'px-4' : 'px-6'
+    }`}>
+      <div className={`max-w-7xl mx-auto flex gap-2.5 ${
+        isMobile ? 'flex-col' : 'flex-row items-center justify-between'
+      }`}>
         
         {/* Brand, Logo & Mobile Controls */}
-        <div className="flex items-center justify-between w-full md:w-auto">
+        <div className={`flex items-center justify-between ${isMobile ? 'w-full' : 'w-auto'}`}>
           <div 
             className="flex items-center space-x-2.5 cursor-pointer select-none" 
             onClick={() => setActiveView('comensal')}
@@ -101,7 +113,7 @@ export default function Navbar({
           </div>
 
           {/* Quick controls on mobile size (Theme & Bell) */}
-          <div className="flex items-center space-x-2 md:hidden">
+          <div className={`flex items-center space-x-2 ${isMobile ? 'flex' : 'hidden'}`}>
             {/* Theme switcher */}
             <button 
               onClick={() => setTheme(theme === 'dark' ? 'light' : theme === 'light' ? 'system' : 'dark')}
@@ -139,10 +151,14 @@ export default function Navbar({
         </div>
 
         {/* Global Controls & Roles Selectors */}
-        <div className="flex flex-col md:flex-row items-center gap-2.5 w-full md:w-auto">
+        <div className={`flex items-center gap-2.5 ${
+          isMobile ? 'flex-col w-full' : 'flex-row w-auto'
+        }`}>
           
           {/* USER PROFILE SELECTOR TAB */}
-          <div className="flex flex-nowrap overflow-x-auto md:flex-wrap items-center bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 gap-0.5 w-full md:w-auto scrollbar-none">
+          <div className={`flex items-center bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 gap-0.5 scrollbar-none ${
+            isMobile ? 'flex-nowrap overflow-x-auto w-full' : 'flex-wrap w-auto'
+          }`}>
             {/* Comensal */}
             <button
               onClick={() => setActiveView('comensal')}
@@ -199,7 +215,7 @@ export default function Navbar({
               onClick={() => setActiveView('invitado')}
               className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all duration-150 shrink-0 ${
                 activeView === 'invitado'
-                  ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-450 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
+                  ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
               }`}
             >
@@ -212,7 +228,7 @@ export default function Navbar({
           </div>
 
           {/* Right Action pills shown ONLY on desktop/tablet */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className={`${isMobile ? 'hidden' : 'flex'} items-center gap-3`}>
             {/* SIMULATOR SWITCH PILL */}
             <div className="flex bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
               <button
@@ -229,7 +245,7 @@ export default function Navbar({
                 onClick={() => setDeviceMode('mobile')}
                 className={`px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all ${
                   deviceMode === 'mobile' 
-                    ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-450 shadow-sm' 
+                    ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm' 
                     : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
                 }`}
               >
