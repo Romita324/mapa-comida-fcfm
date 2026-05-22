@@ -221,62 +221,66 @@ export default function ComensalView({
             </div>
           </div>
 
-          {/* Junaeb and Favorites Toggles */}
+          {/* Junaeb and Favorites Filters */}
           <div className="flex flex-col gap-2.5">
-            {/* JUNAEB Toggle */}
-            <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-              filterJunaeb 
-                ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-900 text-emerald-900 dark:text-emerald-100'
-                : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800'
-            }`}>
+            {/* JUNAEB Filter Button */}
+            <button
+              type="button"
+              onClick={() => setFilterJunaeb(!filterJunaeb)}
+              className={`flex items-center justify-between p-2.5 rounded-xl border transition-all duration-150 active:scale-[0.98] w-full text-left cursor-pointer ${
+                filterJunaeb 
+                  ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100 font-extrabold ring-1 ring-emerald-400/20'
+                  : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
+              }`}
+            >
               <div className="flex items-center space-x-2">
                 <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-black border transition-colors ${
                   filterJunaeb 
-                    ? 'bg-emerald-200 dark:bg-emerald-900 border-emerald-400 text-emerald-800 dark:text-emerald-300'
+                    ? 'bg-emerald-500 text-slate-950 border-emerald-500'
                     : 'bg-emerald-100 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400'
                 }`}>J</span>
                 <div>
                   <p className="text-xs font-bold leading-none">Acepta JUNAEB</p>
                 </div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  checked={filterJunaeb} 
-                  onChange={(e) => setFilterJunaeb(e.target.checked)}
-                  className="sr-only peer" 
-                />
-                <div className="w-8 h-4.5 bg-slate-200 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-emerald-500 peer-checked:after:bg-slate-950 peer-checked:after:border-slate-950"></div>
-              </label>
-            </div>
-
-            {/* FAVORITES Toggle */}
-            {!isGuest && (
-              <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                filterFavorites 
-                  ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-300 dark:border-rose-905 text-rose-900 dark:text-rose-100'
-                  : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800'
+              <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase transition-colors ${
+                filterJunaeb
+                  ? 'bg-emerald-500 text-slate-950'
+                  : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
               }`}>
+                {filterJunaeb ? 'Activo' : 'Filtrar'}
+              </span>
+            </button>
+
+            {/* FAVORITES Filter Button */}
+            {!isGuest && (
+              <button
+                type="button"
+                onClick={() => setFilterFavorites(!filterFavorites)}
+                className={`flex items-center justify-between p-2.5 rounded-xl border transition-all duration-150 active:scale-[0.98] w-full text-left cursor-pointer ${
+                  filterFavorites 
+                    ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-450 dark:border-rose-700 text-rose-900 dark:text-rose-100 font-extrabold ring-1 ring-rose-400/20'
+                    : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
+                }`}
+              >
                 <div className="flex items-center space-x-2">
                   <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-black border transition-colors ${
                     filterFavorites 
-                      ? 'bg-rose-200 dark:bg-rose-900 border-rose-400 text-rose-800 dark:text-rose-300'
+                      ? 'bg-rose-500 text-slate-950 border-rose-500'
                       : 'bg-rose-100 dark:bg-rose-950/60 border-rose-300 dark:border-rose-900 text-rose-600 dark:text-rose-400'
                   }`}>❤️</span>
                   <div>
                     <p className="text-xs font-bold leading-none">Mis Favoritos</p>
                   </div>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
-                    checked={filterFavorites} 
-                    onChange={(e) => setFilterFavorites(e.target.checked)}
-                    className="sr-only peer" 
-                  />
-                  <div className="w-8 h-4.5 bg-slate-200 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-rose-500 peer-checked:after:bg-slate-950 peer-checked:after:border-slate-950"></div>
-                </label>
-              </div>
+                <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase transition-colors ${
+                  filterFavorites
+                    ? 'bg-rose-500 text-slate-950'
+                    : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                }`}>
+                  {filterFavorites ? 'Activo' : 'Filtrar'}
+                </span>
+              </button>
             )}
           </div>
         </div>
@@ -449,60 +453,64 @@ export default function ComensalView({
 
               {/* Toggles */}
               <div className="flex flex-col gap-2.5">
-                {/* JUNAEB Toggle */}
-                <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                  filterJunaeb 
-                    ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-900 text-emerald-900 dark:text-emerald-100'
-                    : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800'
-                }`}>
+                {/* JUNAEB Filter Button */}
+                <button
+                  type="button"
+                  onClick={() => setFilterJunaeb(!filterJunaeb)}
+                  className={`flex items-center justify-between p-2.5 rounded-xl border transition-all duration-150 active:scale-[0.98] w-full text-left cursor-pointer ${
+                    filterJunaeb 
+                      ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100 font-extrabold ring-1 ring-emerald-400/20'
+                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
+                  }`}
+                >
                   <div className="flex items-center space-x-2">
                     <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-black border transition-colors ${
                       filterJunaeb 
-                        ? 'bg-emerald-200 dark:bg-emerald-900 border-emerald-400 text-emerald-800 dark:text-emerald-300'
+                        ? 'bg-emerald-500 text-slate-950 border-emerald-500'
                         : 'bg-emerald-100 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400'
                     }`}>J</span>
                     <div>
                       <p className="text-xs font-bold leading-none">Acepta JUNAEB</p>
                     </div>
                   </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      checked={filterJunaeb} 
-                      onChange={(e) => setFilterJunaeb(e.target.checked)}
-                      className="sr-only peer" 
-                    />
-                    <div className="w-8 h-4.5 bg-slate-200 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-emerald-500 peer-checked:after:bg-slate-950 peer-checked:after:border-slate-950"></div>
-                  </label>
-                </div>
-
-                {/* FAVORITES Toggle */}
-                {!isGuest && (
-                  <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
-                    filterFavorites 
-                      ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-300 dark:border-rose-905 text-rose-900 dark:text-rose-100'
-                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800'
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase transition-colors ${
+                    filterJunaeb
+                      ? 'bg-emerald-500 text-slate-950'
+                      : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
                   }`}>
+                    {filterJunaeb ? 'Activo' : 'Filtrar'}
+                  </span>
+                </button>
+
+                {/* FAVORITES Filter Button */}
+                {!isGuest && (
+                  <button
+                    type="button"
+                    onClick={() => setFilterFavorites(!filterFavorites)}
+                    className={`flex items-center justify-between p-2.5 rounded-xl border transition-all duration-150 active:scale-[0.98] w-full text-left cursor-pointer ${
+                      filterFavorites 
+                        ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-450 dark:border-rose-700 text-rose-900 dark:text-rose-100 font-extrabold ring-1 ring-rose-400/20'
+                        : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
+                    }`}
+                  >
                     <div className="flex items-center space-x-2">
                       <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-black border transition-colors ${
                         filterFavorites 
-                          ? 'bg-rose-200 dark:bg-rose-900 border-rose-400 text-rose-800 dark:text-rose-300'
+                          ? 'bg-rose-500 text-slate-950 border-rose-500'
                           : 'bg-rose-100 dark:bg-rose-950/60 border-rose-300 dark:border-rose-900 text-rose-600 dark:text-rose-400'
                       }`}>❤️</span>
                       <div>
                         <p className="text-xs font-bold leading-none">Mis Favoritos</p>
                       </div>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input 
-                        type="checkbox" 
-                        checked={filterFavorites} 
-                        onChange={(e) => setFilterFavorites(e.target.checked)}
-                        className="sr-only peer" 
-                      />
-                      <div className="w-8 h-4.5 bg-slate-200 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-rose-500 peer-checked:after:bg-slate-950 peer-checked:after:border-slate-950"></div>
-                    </label>
-                  </div>
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase transition-colors ${
+                      filterFavorites
+                        ? 'bg-rose-500 text-slate-950'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                    }`}>
+                      {filterFavorites ? 'Activo' : 'Filtrar'}
+                    </span>
+                  </button>
                 )}
               </div>
 
