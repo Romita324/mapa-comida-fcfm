@@ -30,6 +30,7 @@ export default function ComensalView({
   const [maxDistance, setMaxDistance] = useState(3.0); // Capped at strict 3.0 km
   const [filterFavorites, setFilterFavorites] = useState(false);
   const [mapCenter, setMapCenter] = useState([-33.4581, -70.6642]); // FCFM center
+  const [mobileTab, setMobileTab] = useState('mapa'); // 'mapa' | 'lista'
 
   // Moderator form fields
   const [isModFormOpen, setIsModFormOpen] = useState(false);
@@ -95,6 +96,7 @@ export default function ComensalView({
   const handleSelectLocal = (local) => {
     setSelectedLocal(local);
     setMapCenter(local.coordenadas);
+    setMobileTab('mapa');
   };
 
   const handleModSubmit = (e) => {
@@ -118,10 +120,36 @@ export default function ComensalView({
     : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col lg:flex-row gap-5 h-full w-full overflow-hidden transition-colors duration-200">
+    <div className="w-full h-full p-4 lg:p-6 flex flex-col lg:flex-row gap-4 lg:gap-6 overflow-hidden transition-colors duration-200">
       
+      {/* Tab Switcher for Mobile */}
+      <div className="flex lg:hidden bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-850 w-full shrink-0 mb-1">
+        <button
+          onClick={() => setMobileTab('mapa')}
+          className={`flex-1 flex items-center justify-center space-x-2 py-2 rounded-lg text-xs font-bold transition-all ${
+            mobileTab === 'mapa'
+              ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-450 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-250'
+          }`}
+        >
+          <span>🗺️ Ver Mapa</span>
+        </button>
+        <button
+          onClick={() => setMobileTab('lista')}
+          className={`flex-1 flex items-center justify-center space-x-2 py-2 rounded-lg text-xs font-bold transition-all ${
+            mobileTab === 'lista'
+              ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-450 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-250'
+          }`}
+        >
+          <span>🏪 Ver Locales</span>
+        </button>
+      </div>
+
       {/* LEFT COLUMN: Filters, Favoritos & List */}
-      <div className="w-full lg:w-96 flex flex-col gap-4 overflow-y-auto pr-1 select-none scrollbar-thin shrink-0">
+      <div className={`w-full lg:w-96 flex-col gap-4 overflow-y-auto pr-1 select-none scrollbar-thin shrink-0 ${
+        mobileTab === 'lista' ? 'flex flex-1 h-full' : 'hidden lg:flex'
+      }`}>
         
         {/* Guest Warning Card */}
         {isGuest && (
@@ -363,7 +391,9 @@ export default function ComensalView({
       </div>
 
       {/* RIGHT COLUMN: Map & Detail Side-Drawer */}
-      <div className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden relative shadow-xl h-full flex transition-colors">
+      <div className={`flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden relative shadow-xl h-full transition-colors ${
+        mobileTab === 'mapa' ? 'flex flex-1 h-full' : 'hidden lg:flex'
+      }`}>
         
         {/* Leaflet Map */}
         <div className="flex-1 h-full z-10">
