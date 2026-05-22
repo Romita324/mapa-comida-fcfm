@@ -15,6 +15,19 @@ import {
 
 export default function App() {
   const [activeView, setActiveView] = useState('comensal'); // 'comensal', 'vendedor', 'admin', 'invitado'
+  const [registeredUser, setRegisteredUser] = useState({ username: 'comensal_demo', role: 'comensal' });
+
+  const handleActiveViewChange = (view) => {
+    setActiveView(view);
+    if (view === 'invitado') {
+      setRegisteredUser(null);
+    } else {
+      setRegisteredUser({
+        username: `${view}_demo`,
+        role: view
+      });
+    }
+  };
   
   // Shared reactive states
   const [localesList, setLocalesList] = useState(locales);
@@ -213,12 +226,21 @@ export default function App() {
       nombre: solicitudData.nombre,
       categoria: solicitudData.categoria,
       aceptaJunaeb: solicitudData.aceptaJunaeb,
-      menu: solicitudData.menu,
+      menu: solicitudData.menu.map(item => ({ ...item, agotado: false })),
       coordenadas: [-33.4581 + (Math.random() - 0.5) * 0.008, -70.6642 + (Math.random() - 0.5) * 0.008], // Random near FCFM
-      estado: 'Pendiente'
+      estado: 'Pendiente',
+      vendedorUsername: registeredUser ? registeredUser.username : 'vendedor_demo'
     };
     setSolicitudesVendedor(prev => [...prev, newSolicitud]);
     addToast("Solicitud de local enviada al Administrador", "success");
+  };
+
+  // HANDLER: Vendedor updates local menu (e.g. toggles item out-of-stock)
+  const handleUpdateLocalMenu = (localId, updatedMenu) => {
+    setLocalesList(prev => 
+      prev.map(l => l.id === localId ? { ...l, menu: updatedMenu } : l)
+    );
+    addToast("Menú de local actualizado", "success");
   };
 
   // HANDLER: Admin Approves Vendor Local
@@ -241,7 +263,8 @@ export default function App() {
       aceptaJunaeb: solicitud.aceptaJunaeb,
       estadoServicio: 'Abierto',
       menu: solicitud.menu,
-      solicitudId: solicitud.id // connect them
+      solicitudId: solicitud.id, // connect them
+      vendedorUsername: solicitud.vendedorUsername
     };
     setLocalesList(prev => [...prev, newLocal]);
 
@@ -335,7 +358,7 @@ export default function App() {
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200 relative">
       <Navbar 
         activeView={activeView} 
-        setActiveView={(view) => setActiveView(view)} 
+        setActiveView={handleActiveViewChange} 
         pendingReportsCount={pendingReportsCount}
         theme={theme}
         setTheme={setTheme}
@@ -381,6 +404,8 @@ export default function App() {
           <VendedorView 
             locales={localesList} 
             onUpdateLocalStatus={handleUpdateLocalStatus}
+            registeredUser={registeredUser}
+            onUpdateLocalMenu={handleUpdateLocalMenu}
           />
         )}
         
@@ -420,6 +445,12 @@ export default function App() {
         reseñas={reseñasList}
         reportesList={reportesList}
         favoritos={favoritos}
+        registeredUser={registeredUser}
+        onRegisterUser={(username, role) => {
+          setRegisteredUser({ username, role });
+          setActiveView(role);
+          addToast(`Cuenta @${username} creada exitosamente`, "success");
+        }}
       />
     </div>
   );

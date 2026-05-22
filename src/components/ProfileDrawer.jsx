@@ -11,8 +11,14 @@ export default function ProfileDrawer({
   locales,
   reseñas,
   reportesList,
-  favoritos
+  favoritos,
+  registeredUser,
+  onRegisterUser
 }) {
+  // Account Registration State
+  const [regUsername, setRegUsername] = useState('');
+  const [regRole, setRegRole] = useState('comensal');
+
   // Comensal Form State
   const [modUsuario, setModUsuario] = useState('');
   const [modRut, setModRut] = useState('');
@@ -117,12 +123,55 @@ export default function ProfileDrawer({
           
           {/* 1. GUEST / INVITADO */}
           {activeView === 'invitado' && (
-            <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
-              <span className="text-4xl mb-3">🛡️</span>
-              <h4 className="text-xs font-black text-slate-700 dark:text-slate-300">Acceso Restringido</h4>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2 leading-relaxed max-w-[240px]">
-                Estás navegando en modo de invitado. Para solicitar la incorporación de locales o postular como moderador, debes ingresar a una de las cuentas activas desde la barra de navegación.
-              </p>
+            <div className="flex flex-col gap-4 animate-scale-up">
+              <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-inner">
+                <span className="text-2xl block mb-1 text-center">📝</span>
+                <h4 className="text-xs font-black text-slate-700 dark:text-slate-200 text-center mb-1">Registrar Nueva Cuenta</h4>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center mb-4 leading-normal">
+                  Crea tu perfil en Beauchef Eats para solicitar locales, administrar stock de menús o moderar la comunidad.
+                </p>
+
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!regUsername.trim()) return;
+                    onRegisterUser(regUsername.trim(), regRole);
+                    setRegUsername('');
+                  }}
+                  className="flex flex-col gap-3.5"
+                >
+                  <div>
+                    <label className="text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-extrabold block mb-1">Nombre de Usuario</label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="ej: diego_inge"
+                      value={regUsername}
+                      onChange={(e) => setRegUsername(e.target.value)}
+                      className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-805 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-extrabold block mb-1">Tipo de Cuenta</label>
+                    <select 
+                      value={regRole}
+                      onChange={(e) => setRegRole(e.target.value)}
+                      className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-805 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 font-bold transition-colors"
+                    >
+                      <option value="comensal">Comensal / Estudiante</option>
+                      <option value="vendedor">Vendedor / Locatario</option>
+                    </select>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black rounded-xl text-xs shadow-md transition-all active:scale-[0.98] hover:opacity-95"
+                  >
+                    Crear Cuenta e Habilitar Vista
+                  </button>
+                </form>
+              </div>
             </div>
           )}
 
@@ -214,152 +263,188 @@ export default function ProfileDrawer({
                     No has enviado ninguna postulación aún.
                   </p>
                 )}
-              </div>
             </div>
-          )}
+          </div>
+        )}
 
           {/* 3. VENDEDOR PROFILE */}
-          {activeView === 'vendedor' && (
-            <div className="flex flex-col gap-5 animate-fade-in">
-              {/* Local Registration Form */}
-              <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800/80">
-                <h4 className="text-xs font-black text-slate-700 dark:text-slate-200 mb-1">Registrar Nuevo Local</h4>
-                <p className="text-[9px] text-slate-400 dark:text-slate-500 mb-3 leading-normal">
-                  Somete a evaluación del Administrador tu local de comida. Tras la aprobación, aparecerás en el mapa oficial.
-                </p>
+          {activeView === 'vendedor' && (() => {
+            const sellerUsername = registeredUser?.username || 'vendedor_demo';
+            const hasApprovedLocal = locales.some(l => l.vendedorUsername === sellerUsername);
+            const activeRequest = solicitudesVendedor.find(s => s.vendedorUsername === sellerUsername && s.estado === 'Pendiente');
+            const hasExisting = hasApprovedLocal || activeRequest;
+            const myRequests = solicitudesVendedor.filter(req => req.vendedorUsername === sellerUsername);
 
-                <form onSubmit={handleLocalSubmit} className="flex flex-col gap-3">
-                  <div>
-                    <label className="text-[9px] text-slate-500 uppercase tracking-widest font-bold block mb-1">Nombre del Local</label>
-                    <input 
-                      type="text" 
-                      required
-                      placeholder="ej: Casino Central FCFM"
-                      value={localNombre}
-                      onChange={(e) => setLocalNombre(e.target.value)}
-                      className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 transition-colors"
-                    />
+            return (
+              <div className="flex flex-col gap-5 animate-fade-in">
+                {/* Local Registration Form or Status Info Card */}
+                {hasExisting ? (
+                  <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800/80 shadow-md">
+                    {hasApprovedLocal ? (
+                      <div className="text-center py-2">
+                        <span className="text-3xl block mb-2">🏪</span>
+                        <h4 className="text-xs font-black text-slate-700 dark:text-slate-200 mb-1">¡Tu local está activo!</h4>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-4 leading-normal">
+                          Tu local comercial ya se encuentra aprobado y visible para todos los comensales en el mapa.
+                        </p>
+                        <div className="inline-block px-3 py-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-300 dark:border-emerald-900 rounded-lg text-[10px] font-black uppercase font-mono">
+                          Estado: Habilitado
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-2">
+                        <span className="text-3xl block mb-2">⏳</span>
+                        <h4 className="text-xs font-black text-slate-700 dark:text-slate-200 mb-1">Solicitud en Revisión</h4>
+                        <p className="text-[10px] text-slate-400 dark:text-slate-500 mb-4 leading-normal">
+                          Hemos recibido la solicitud para tu local <span className="font-bold text-slate-700 dark:text-slate-200">"{activeRequest.nombre}"</span>. El equipo de administración la está revisando.
+                        </p>
+                        <div className="inline-block px-3 py-1 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border border-amber-300 dark:border-amber-900 rounded-lg text-[10px] font-black uppercase font-mono animate-pulse">
+                          Estado: Pendiente
+                        </div>
+                      </div>
+                    )}
                   </div>
+                ) : (
+                  <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800/80">
+                    <h4 className="text-xs font-black text-slate-700 dark:text-slate-200 mb-1">Registrar Nuevo Local</h4>
+                    <p className="text-[9px] text-slate-400 dark:text-slate-500 mb-3 leading-normal">
+                      Somete a evaluación del Administrador tu local de comida. Tras la aprobación, aparecerás en el mapa oficial.
+                    </p>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[9px] text-slate-500 dark:text-slate-500 uppercase tracking-widest font-bold block mb-1">Categoría</label>
-                      <select 
-                        value={localCategoria}
-                        onChange={(e) => setLocalCategoria(e.target.value)}
-                        className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 font-bold transition-colors"
-                      >
-                        <option value="Almuerzos">Almuerzos</option>
-                        <option value="Fast Food">Fast Food</option>
-                        <option value="Cafetería">Cafetería</option>
-                        <option value="Pastelería">Pastelería</option>
-                        <option value="Snacks">Snacks</option>
-                      </select>
-                    </div>
-
-                    <div className="flex flex-col justify-end pb-1">
-                      <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-2 rounded-lg border border-slate-200 dark:border-slate-800 h-9.5">
-                        <span className="text-[9px] font-bold text-slate-500">JUNAEB</span>
+                    <form onSubmit={handleLocalSubmit} className="flex flex-col gap-3">
+                      <div>
+                        <label className="text-[9px] text-slate-500 uppercase tracking-widest font-bold block mb-1">Nombre del Local</label>
                         <input 
-                          type="checkbox" 
-                          checked={localJunaeb}
-                          onChange={(e) => setLocalJunaeb(e.target.checked)}
-                          className="w-4 h-4 rounded text-emerald-500 accent-emerald-500 border-slate-200 dark:border-slate-800"
+                          type="text" 
+                          required
+                          placeholder="ej: Casino Central FCFM"
+                          value={localNombre}
+                          onChange={(e) => setLocalNombre(e.target.value)}
+                          className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 transition-colors"
                         />
                       </div>
-                    </div>
-                  </div>
 
-                  {/* Menu Editor */}
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <label className="text-[9px] text-slate-500 dark:text-slate-500 uppercase tracking-widest font-bold">Menú de Comida</label>
-                      <button 
-                        type="button" 
-                        onClick={handleAddMenuItem}
-                        className="text-[9px] text-emerald-500 font-black hover:underline"
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[9px] text-slate-500 dark:text-slate-500 uppercase tracking-widest font-bold block mb-1">Categoría</label>
+                          <select 
+                            value={localCategoria}
+                            onChange={(e) => setLocalCategoria(e.target.value)}
+                            className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 font-bold transition-colors"
+                          >
+                            <option value="Almuerzos">Almuerzos</option>
+                            <option value="Fast Food">Fast Food</option>
+                            <option value="Cafetería">Cafetería</option>
+                            <option value="Pastelería">Pastelería</option>
+                            <option value="Snacks">Snacks</option>
+                          </select>
+                        </div>
+
+                        <div className="flex flex-col justify-end pb-1">
+                          <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-2 rounded-lg border border-slate-200 dark:border-slate-800 h-9.5">
+                            <span className="text-[9px] font-bold text-slate-500">JUNAEB</span>
+                            <input 
+                              type="checkbox" 
+                              checked={localJunaeb}
+                              onChange={(e) => setLocalJunaeb(e.target.checked)}
+                              className="w-4 h-4 rounded text-emerald-500 accent-emerald-500 border-slate-200 dark:border-slate-800"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Menu Editor */}
+                      <div>
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="text-[9px] text-slate-500 dark:text-slate-500 uppercase tracking-widest font-bold">Menú de Comida</label>
+                          <button 
+                            type="button" 
+                            onClick={handleAddMenuItem}
+                            className="text-[9px] text-emerald-500 font-black hover:underline"
+                          >
+                            + Agregar Plato
+                          </button>
+                        </div>
+
+                        <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto pr-1">
+                          {menuItems.map((menuItem, idx) => (
+                            <div key={idx} className="flex items-center gap-1.5">
+                              <input 
+                                type="text" 
+                                required
+                                placeholder="Plato/Bebida"
+                                value={menuItem.item}
+                                onChange={(e) => handleMenuChange(idx, 'item', e.target.value)}
+                                className="flex-1 text-xs p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 transition-colors"
+                              />
+                              <input 
+                                type="number" 
+                                required
+                                placeholder="Precio ($)"
+                                value={menuItem.precio}
+                                onChange={(e) => handleMenuChange(idx, 'precio', e.target.value)}
+                                className="w-20 text-xs p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 font-mono font-bold transition-colors"
+                              />
+                              {menuItems.length > 1 && (
+                                <button 
+                                  type="button" 
+                                  onClick={() => handleRemoveMenuItem(idx)}
+                                  className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg text-xs"
+                                >
+                                  ✕
+                                </button>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="w-full py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold rounded-xl text-xs shadow-md transition-all active:scale-[0.98] hover:opacity-95"
                       >
-                        + Agregar Plato
+                        Enviar Solicitud
                       </button>
-                    </div>
+                    </form>
+                  </div>
+                )}
 
-                    <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto pr-1">
-                      {menuItems.map((menuItem, idx) => (
-                        <div key={idx} className="flex items-center gap-1.5">
-                          <input 
-                            type="text" 
-                            required
-                            placeholder="Plato/Bebida"
-                            value={menuItem.item}
-                            onChange={(e) => handleMenuChange(idx, 'item', e.target.value)}
-                            className="flex-1 text-xs p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 transition-colors"
-                          />
-                          <input 
-                            type="number" 
-                            required
-                            placeholder="Precio ($)"
-                            value={menuItem.precio}
-                            onChange={(e) => handleMenuChange(idx, 'precio', e.target.value)}
-                            className="w-20 text-xs p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 font-mono font-bold transition-colors"
-                          />
-                          {menuItems.length > 1 && (
-                            <button 
-                              type="button" 
-                              onClick={() => handleRemoveMenuItem(idx)}
-                              className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg text-xs"
-                            >
-                              ✕
-                            </button>
-                          )}
+                {/* Solicitudes Tracker */}
+                <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
+                  <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-2">Estado de mis Locales</span>
+                  
+                  {myRequests.length > 0 ? (
+                    <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
+                      {myRequests.map(req => (
+                        <div 
+                          key={req.id} 
+                          className="flex justify-between items-center p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px]"
+                        >
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-700 dark:text-slate-300">🏪 {req.nombre}</span>
+                            <span className="text-[8px] text-slate-400 font-mono">{req.categoria} • ID: {req.id}</span>
+                          </div>
+                          <span className={`px-2 py-0.5 rounded font-black text-[9px] ${
+                            req.estado === 'Aprobado' 
+                              ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400' 
+                              : req.estado === 'Rechazado' 
+                              ? 'bg-rose-100 dark:bg-rose-900 text-rose-800 dark:text-rose-400' 
+                              : 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-400'
+                          }`}>
+                            {req.estado}
+                          </span>
                         </div>
                       ))}
                     </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-bold rounded-xl text-xs shadow-md transition-all active:scale-[0.98] hover:opacity-95"
-                  >
-                    Enviar Solicitud
-                  </button>
-                </form>
+                  ) : (
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 italic text-center py-2">
+                      No has registrado solicitudes aún.
+                    </p>
+                  )}
+                </div>
               </div>
-
-              {/* Solicitudes Tracker */}
-              <div className="border-t border-slate-100 dark:border-slate-800 pt-3">
-                <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-2">Estado de mis Locales</span>
-                
-                {solicitudesVendedor.length > 0 ? (
-                  <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
-                    {solicitudesVendedor.map(req => (
-                      <div 
-                        key={req.id} 
-                        className="flex justify-between items-center p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px]"
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-bold text-slate-700 dark:text-slate-300">🏪 {req.nombre}</span>
-                          <span className="text-[8px] text-slate-400 font-mono">{req.categoria} • ID: {req.id}</span>
-                        </div>
-                        <span className={`px-2 py-0.5 rounded font-black text-[9px] ${
-                          req.estado === 'Aprobado' 
-                            ? 'bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-400' 
-                            : req.estado === 'Rechazado' 
-                            ? 'bg-rose-100 dark:bg-rose-900 text-rose-800 dark:text-rose-400' 
-                            : 'bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-400'
-                        }`}>
-                          {req.estado}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-[10px] text-slate-400 dark:text-slate-500 italic text-center py-2">
-                    No has registrado solicitudes aún.
-                  </p>
-                )}
-              </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* 4. ADMINISTRADOR PROFILE */}
           {activeView === 'admin' && (
