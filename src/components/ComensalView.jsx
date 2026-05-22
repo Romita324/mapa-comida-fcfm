@@ -24,6 +24,7 @@ export default function ComensalView({
   deviceMode
 }) {
   const [selectedLocal, setSelectedLocal] = useState(null);
+  const [isFloatingFiltersOpen, setIsFloatingFiltersOpen] = useState(false);
   const [filterJunaeb, setFilterJunaeb] = useState(false);
   const [filterCategory, setFilterCategory] = useState('All');
   const [maxDistance, setMaxDistance] = useState(3.0); // Capped at strict 3.0 km
@@ -64,31 +65,38 @@ export default function ComensalView({
       color = 'bg-rose-500 text-white border-rose-300 ring-rose-500/25';
     } else if (local.estadoServicio === 'Sin Stock') {
       color = 'bg-amber-500 text-slate-950 border-amber-300 ring-amber-500/25';
+    } else if (local.estadoServicio === 'Colación') {
+      color = 'bg-orange-500 text-white border-orange-300 ring-orange-500/25';
     }
 
     const junaebBadge = local.aceptaJunaeb
-      ? `<span class="absolute -top-1.5 -right-1.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-emerald-600 text-[8px] font-black border border-slate-900 text-white shadow-md">J</span>`
+      ? `<span class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-600 text-[8px] font-black border border-white dark:border-slate-950 text-white shadow-md">J</span>`
       : '';
 
     const favHeart = isFav
-      ? `<span class="absolute -bottom-1.5 -right-1.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rose-600 border border-slate-900 text-white shadow-md text-[8px]">❤️</span>`
+      ? `<span class="absolute -bottom-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-600 border border-white dark:border-slate-950 text-white shadow-md text-[8px]">❤️</span>`
       : '';
 
     const html = `
-      <div class="relative flex items-center justify-center w-8 h-8 rounded-full border-2 shadow-lg ring-4 transform transition-all duration-300 hover:scale-125 ${color}">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
-        </svg>
-        ${junaebBadge}
-        ${favHeart}
+      <div class="flex flex-col items-center justify-start w-[120px] h-[60px]">
+        <div class="relative flex items-center justify-center w-8 h-8 rounded-full border-2 shadow-lg ring-4 transform transition-all duration-300 hover:scale-125 ${color}">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+          </svg>
+          ${junaebBadge}
+          ${favHeart}
+        </div>
+        <div class="mt-1 px-1.5 py-0.5 rounded bg-slate-900/90 dark:bg-slate-950/90 border border-slate-700/50 dark:border-slate-800/80 text-[8px] font-extrabold text-white text-center shadow-md truncate max-w-[110px] leading-tight select-none pointer-events-none">
+          ${local.nombre}
+        </div>
       </div>
     `;
 
     return L.divIcon({
       html: html,
       className: 'custom-map-marker-container',
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
+      iconSize: [120, 60],
+      iconAnchor: [60, 16],
       popupAnchor: [0, -16]
     });
   };
@@ -216,11 +224,19 @@ export default function ComensalView({
           {/* Junaeb and Favorites Toggles */}
           <div className="flex flex-col gap-2.5">
             {/* JUNAEB Toggle */}
-            <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
+            <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
+              filterJunaeb 
+                ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-900 text-emerald-900 dark:text-emerald-100'
+                : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800'
+            }`}>
               <div className="flex items-center space-x-2">
-                <span className="flex h-5 w-5 items-center justify-center rounded bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-900 text-[10px] font-black text-emerald-600 dark:text-emerald-400">J</span>
+                <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-black border transition-colors ${
+                  filterJunaeb 
+                    ? 'bg-emerald-200 dark:bg-emerald-900 border-emerald-400 text-emerald-800 dark:text-emerald-300'
+                    : 'bg-emerald-100 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400'
+                }`}>J</span>
                 <div>
-                  <p className="text-xs font-bold text-slate-700 dark:text-slate-200 leading-none">Acepta JUNAEB</p>
+                  <p className="text-xs font-bold leading-none">Acepta JUNAEB</p>
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -236,11 +252,19 @@ export default function ComensalView({
 
             {/* FAVORITES Toggle */}
             {!isGuest && (
-              <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors">
+              <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
+                filterFavorites 
+                  ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-300 dark:border-rose-905 text-rose-900 dark:text-rose-100'
+                  : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800'
+              }`}>
                 <div className="flex items-center space-x-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded bg-rose-100 dark:bg-rose-950/60 border border-rose-300 dark:border-rose-900 text-[10px] font-black text-rose-600 dark:text-rose-400">❤️</span>
+                  <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-black border transition-colors ${
+                    filterFavorites 
+                      ? 'bg-rose-200 dark:bg-rose-900 border-rose-400 text-rose-800 dark:text-rose-300'
+                      : 'bg-rose-100 dark:bg-rose-950/60 border-rose-300 dark:border-rose-900 text-rose-600 dark:text-rose-400'
+                  }`}>❤️</span>
                   <div>
-                    <p className="text-xs font-bold text-slate-700 dark:text-slate-200 leading-none">Mis Favoritos</p>
+                    <p className="text-xs font-bold leading-none">Mis Favoritos</p>
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
@@ -289,6 +313,8 @@ export default function ComensalView({
                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide shrink-0 ${
                       local.estadoServicio === 'Abierto'
                         ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900'
+                        : local.estadoServicio === 'Colación'
+                        ? 'bg-orange-100 dark:bg-orange-950/70 text-orange-850 dark:text-orange-400 border border-orange-200 dark:border-orange-900/50'
                         : local.estadoServicio === 'Sin Stock'
                         ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900'
                         : 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-400 border border-rose-200 dark:border-rose-900'
@@ -334,6 +360,162 @@ export default function ComensalView({
           : 'flex flex-1 h-full'
       }`}>
         
+        {/* Floating Filters Button for Mobile */}
+        {isMobile && mobileTab === 'mapa' && (
+          <button
+            onClick={() => setIsFloatingFiltersOpen(true)}
+            className="absolute top-4 right-4 z-[1001] px-3.5 py-2.5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md hover:bg-white dark:hover:bg-slate-900 text-slate-800 dark:text-slate-100 font-extrabold text-xs rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 flex items-center gap-1.5 transition-all active:scale-95"
+          >
+            <span>🔍</span>
+            <span>Filtros</span>
+          </button>
+        )}
+
+        {/* Slide-up Mobile Filters Sheet */}
+        {isMobile && isFloatingFiltersOpen && (
+          <>
+            {/* Backdrop */}
+            <div 
+              className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs z-[1002] animate-fade-in"
+              onClick={() => setIsFloatingFiltersOpen(false)}
+            />
+            
+            {/* Sheet Panel */}
+            <div className="absolute bottom-0 inset-x-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 rounded-t-[32px] p-5 pb-8 z-[1003] shadow-2xl flex flex-col gap-4 max-h-[70%] overflow-y-auto animate-slide-in-up scrollbar-none">
+              
+              {/* Header */}
+              <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex items-center space-x-1.5">
+                  <span className="text-base">🔍</span>
+                  <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">Filtros de Búsqueda</h3>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <button 
+                    onClick={() => { setFilterJunaeb(false); setFilterCategory('All'); setMaxDistance(3.0); setFilterFavorites(false); }}
+                    className="text-[11px] text-emerald-500 hover:text-emerald-400 font-bold transition-colors"
+                  >
+                    Restablecer
+                  </button>
+                  <button 
+                    onClick={() => setIsFloatingFiltersOpen(false)}
+                    className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              {/* Category Selector */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Categoría</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {categories.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setFilterCategory(cat)}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                        filterCategory === cat
+                          ? 'bg-slate-900 dark:bg-slate-100 border-slate-900 dark:border-slate-100 text-white dark:text-slate-950 font-black'
+                          : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      {cat === 'All' ? 'Todas' : cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Distance Slider */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                  <span>Distancia Máxima</span>
+                  <span className="text-emerald-500 dark:text-emerald-400 font-extrabold font-mono">{maxDistance.toFixed(1)} km</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="3.0"
+                  step="0.1"
+                  value={maxDistance}
+                  onChange={(e) => setMaxDistance(parseFloat(e.target.value))}
+                  className="w-full h-1 bg-slate-200 dark:bg-slate-950 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                />
+                <div className="flex justify-between text-[9px] text-slate-400 dark:text-slate-500 font-mono">
+                  <span>0.1 km</span>
+                  <span>1.5 km</span>
+                  <span>3.0 km (Geofencing)</span>
+                </div>
+              </div>
+
+              {/* Toggles */}
+              <div className="flex flex-col gap-2.5">
+                {/* JUNAEB Toggle */}
+                <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
+                  filterJunaeb 
+                    ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-900 text-emerald-900 dark:text-emerald-100'
+                    : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800'
+                }`}>
+                  <div className="flex items-center space-x-2">
+                    <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-black border transition-colors ${
+                      filterJunaeb 
+                        ? 'bg-emerald-200 dark:bg-emerald-900 border-emerald-400 text-emerald-800 dark:text-emerald-300'
+                        : 'bg-emerald-100 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400'
+                    }`}>J</span>
+                    <div>
+                      <p className="text-xs font-bold leading-none">Acepta JUNAEB</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      checked={filterJunaeb} 
+                      onChange={(e) => setFilterJunaeb(e.target.checked)}
+                      className="sr-only peer" 
+                    />
+                    <div className="w-8 h-4.5 bg-slate-200 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-emerald-500 peer-checked:after:bg-slate-950 peer-checked:after:border-slate-950"></div>
+                  </label>
+                </div>
+
+                {/* FAVORITES Toggle */}
+                {!isGuest && (
+                  <div className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
+                    filterFavorites 
+                      ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-300 dark:border-rose-905 text-rose-900 dark:text-rose-100'
+                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800'
+                  }`}>
+                    <div className="flex items-center space-x-2">
+                      <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-black border transition-colors ${
+                        filterFavorites 
+                          ? 'bg-rose-200 dark:bg-rose-900 border-rose-400 text-rose-800 dark:text-rose-300'
+                          : 'bg-rose-100 dark:bg-rose-950/60 border-rose-300 dark:border-rose-900 text-rose-600 dark:text-rose-400'
+                      }`}>❤️</span>
+                      <div>
+                        <p className="text-xs font-bold leading-none">Mis Favoritos</p>
+                      </div>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={filterFavorites} 
+                        onChange={(e) => setFilterFavorites(e.target.checked)}
+                        className="sr-only peer" 
+                      />
+                      <div className="w-8 h-4.5 bg-slate-200 dark:bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-rose-500 peer-checked:after:bg-slate-950 peer-checked:after:border-slate-950"></div>
+                    </label>
+                  </div>
+                )}
+              </div>
+
+              <button 
+                onClick={() => setIsFloatingFiltersOpen(false)}
+                className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black rounded-xl text-xs shadow-md transition-all active:scale-[0.98] mt-2"
+              >
+                Ver locales filtrados ({filteredLocales.length})
+              </button>
+            </div>
+          </>
+        )}
+
         {/* Leaflet Map */}
         <div className="w-full h-full z-10">
           <MapContainer 
@@ -385,6 +567,8 @@ export default function ComensalView({
                       <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${
                         local.estadoServicio === 'Abierto'
                           ? 'bg-emerald-100 text-emerald-800'
+                          : local.estadoServicio === 'Colación'
+                          ? 'bg-orange-100 text-orange-850'
                           : local.estadoServicio === 'Sin Stock'
                           ? 'bg-amber-100 text-amber-800'
                           : 'bg-rose-100 text-rose-800'
@@ -450,6 +634,8 @@ export default function ComensalView({
                 <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide shrink-0 ${
                   selectedLocal.estadoServicio === 'Abierto'
                     ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900'
+                    : selectedLocal.estadoServicio === 'Colación'
+                    ? 'bg-orange-100 dark:bg-orange-950/70 text-orange-850 dark:text-orange-400 border border-orange-200 dark:border-orange-900/50'
                     : selectedLocal.estadoServicio === 'Sin Stock'
                     ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900'
                     : 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-400 border border-rose-200 dark:border-rose-900'
@@ -488,9 +674,19 @@ export default function ComensalView({
               <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Menú Oferta</h4>
               <div className="flex flex-col gap-1.5 bg-slate-50 dark:bg-slate-950 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors">
                 {selectedLocal.menu && selectedLocal.menu.map((food, i) => (
-                  <div key={i} className="flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-900/60 last:border-b-0">
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{food.item}</span>
-                    <span className="text-xs font-extrabold font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-100/50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-900/30">
+                  <div key={i} className={`flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-900/60 last:border-b-0 ${
+                    food.agotado ? 'opacity-40 select-none' : ''
+                  }`}>
+                    <span className={`text-xs font-bold text-slate-700 dark:text-slate-200 ${
+                      food.agotado ? 'line-through text-slate-400 dark:text-slate-500' : ''
+                    }`}>
+                      {food.item} {food.agotado && <span className="text-[9px] text-rose-500 font-extrabold ml-1 uppercase">(Agotado)</span>}
+                    </span>
+                    <span className={`text-xs font-extrabold font-mono px-2 py-0.5 rounded border ${
+                      food.agotado 
+                        ? 'text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800' 
+                        : 'text-emerald-600 dark:text-emerald-400 bg-emerald-100/50 dark:bg-emerald-950/40 border-emerald-200/50 dark:border-emerald-900/30'
+                    }`}>
                       ${food.precio.toLocaleString('es-CL')}
                     </span>
                   </div>
