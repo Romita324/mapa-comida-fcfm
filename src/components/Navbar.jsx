@@ -114,6 +114,16 @@ export default function Navbar({
 
           {/* Quick controls on mobile size (Theme & Bell) */}
           <div className={`flex items-center space-x-2 ${isMobile ? 'flex' : 'hidden'}`}>
+            {deviceMode === 'mobile' && windowWidth >= 768 && (
+              <button 
+                onClick={() => setDeviceMode('browser')}
+                className="p-2 rounded-xl bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 text-xs shrink-0 font-bold transition-colors"
+                title="Volver a Pantalla Completa"
+              >
+                🖥️
+              </button>
+            )}
+
             {/* Theme switcher */}
             <button 
               onClick={() => setTheme(theme === 'dark' ? 'light' : theme === 'light' ? 'system' : 'dark')}
