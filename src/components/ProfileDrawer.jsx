@@ -119,7 +119,7 @@ export default function ProfileDrawer({
           {activeView === 'invitado' && (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-4">
               <span className="text-4xl mb-3">🛡️</span>
-              <h4 className="text-xs font-black text-slate-700 dark:text-slate-350">Acceso Restringido</h4>
+              <h4 className="text-xs font-black text-slate-700 dark:text-slate-300">Acceso Restringido</h4>
               <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2 leading-relaxed max-w-[240px]">
                 Estás navegando en modo de invitado. Para solicitar la incorporación de locales o postular como moderador, debes ingresar a una de las cuentas activas desde la barra de navegación.
               </p>
@@ -194,7 +194,7 @@ export default function ProfileDrawer({
                         className="flex justify-between items-center p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[10px]"
                       >
                         <div className="flex flex-col">
-                          <span className="font-bold text-slate-700 dark:text-slate-350">@{app.usuario}</span>
+                          <span className="font-bold text-slate-700 dark:text-slate-300">@{app.usuario}</span>
                           <span className="text-[8px] text-slate-400 font-mono">ID: {app.id}</span>
                         </div>
                         <span className={`px-2 py-0.5 rounded font-black text-[9px] ${

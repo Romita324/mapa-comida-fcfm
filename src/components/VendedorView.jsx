@@ -17,7 +17,7 @@ export default function VendedorView({
         <h2 className="text-xl font-extrabold bg-gradient-to-r from-emerald-500 to-teal-400 dark:from-emerald-400 dark:to-teal-200 bg-clip-text text-transparent">
           Portal de Locatarios
         </h2>
-        <p className="text-[11px] text-slate-450 dark:text-slate-500 mt-1 leading-relaxed">
+        <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 leading-relaxed">
           Sincronización de bajo consumo de datos y ancho de banda. Administra la disponibilidad y stock en caliente de tu local comercial.
         </p>
       </div>
@@ -47,7 +47,7 @@ export default function VendedorView({
               <div className="flex flex-col gap-4">
                 <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 transition-colors">
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-450 border border-emerald-200 dark:border-emerald-900 px-2 py-0.5 rounded font-black uppercase font-mono">
+                    <span className="text-[9px] bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900 px-2 py-0.5 rounded font-black uppercase font-mono">
                       Aprobado y Visible en el Mapa
                     </span>
                     <span className="text-[10px] text-slate-400 font-mono">ID #{activeLocal.id}</span>
@@ -61,8 +61,8 @@ export default function VendedorView({
                       activeLocal.estadoServicio === 'Abierto'
                         ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400'
                         : activeLocal.estadoServicio === 'Sin Stock'
-                        ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-450'
-                        : 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-450'
+                        ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400'
+                        : 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-400'
                     }`}>
                       {activeLocal.estadoServicio}
                     </span>
@@ -81,7 +81,7 @@ export default function VendedorView({
         ) : (
           <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 text-center transition-colors">
             <span className="text-3xl block mb-2">🏪</span>
-            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-350">Sin locales vinculados</h4>
+            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300">Sin locales vinculados</h4>
             <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2 leading-normal">
               No tienes locales comerciales aprobados. Abre tu <span className="font-extrabold text-emerald-500">Perfil de Usuario</span> (icono 👤 en la cabecera) para registrar un nuevo local o revisar solicitudes en proceso.
             </p>
