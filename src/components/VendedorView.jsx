@@ -1,4 +1,28 @@
 import { useState } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+
+function MapClickEvents({ onClick }) {
+  useMapEvents({
+    click(e) {
+      onClick(e.latlng);
+    },
+  });
+  return null;
+}
+
+const pickerIcon = typeof window !== 'undefined' && L ? L.divIcon({
+  html: `
+    <div class="flex flex-col items-center justify-start w-[80px] h-[40px]">
+      <div class="relative flex items-center justify-center w-6 h-6 rounded-full border-2 border-amber-300 bg-amber-500 text-slate-950 shadow-md ring-2 ring-amber-500/25">
+        <span class="text-[10px]">📍</span>
+      </div>
+    </div>
+  `,
+  className: 'custom-map-marker-container',
+  iconSize: [80, 40],
+  iconAnchor: [40, 20]
+}) : null;
 
 export default function VendedorView({ 
   locales = [], 
@@ -28,19 +52,8 @@ export default function VendedorView({
   const [regLocalNombre, setRegLocalNombre] = useState('');
   const [regLocalCategoria, setRegLocalCategoria] = useState('Casino');
   const [regLocalJunaeb, setRegLocalJunaeb] = useState(true);
-  const [regLocalPreset, setRegLocalPreset] = useState('Patio Central');
-  const [regLocalMenu, setRegLocalMenu] = useState([]);
-  const [tempItemName, setTempItemName] = useState('');
-  const [tempItemPrice, setTempItemPrice] = useState('');
-
-  // Location Presets
-  const locationPresets = {
-    'Patio Central': [-33.4581, -70.6642],
-    'Beauchef 851': [-33.4568, -70.6636],
-    'Entrada Blanco Encalada': [-33.4572, -70.6645],
-    'Edificio Física': [-33.4588, -70.6648],
-    'Edificio Geología': [-33.4576, -70.6651],
-  };
+  const [regLocalLat, setRegLocalLat] = useState(-33.4581);
+  const [regLocalLng, setRegLocalLng] = useState(-70.6642);
 
   // Check if they have a pending request
   const pendingSolicitud = solicitudesVendedor.find(
@@ -80,17 +93,6 @@ export default function VendedorView({
     setConfirmItem(null);
   };
 
-  const handleAddTempItem = (e) => {
-    e.preventDefault();
-    if (!tempItemName.trim() || !tempItemPrice) return;
-    const priceVal = parseInt(tempItemPrice);
-    if (isNaN(priceVal) || priceVal <= 0) return;
-    
-    setRegLocalMenu(prev => [...prev, { item: tempItemName.trim(), precio: priceVal }]);
-    setTempItemName('');
-    setTempItemPrice('');
-  };
-
   const handleRegisterSubmit = (e) => {
     e.preventDefault();
     if (!regLocalNombre.trim()) return;
@@ -99,16 +101,16 @@ export default function VendedorView({
       nombre: regLocalNombre.trim(),
       categoria: regLocalCategoria,
       aceptaJunaeb: regLocalJunaeb,
-      menu: regLocalMenu,
-      coordenadas: locationPresets[regLocalPreset]
+      menu: [],
+      coordenadas: [regLocalLat, regLocalLng]
     });
 
     // Reset Form
     setRegLocalNombre('');
     setRegLocalCategoria('Casino');
     setRegLocalJunaeb(true);
-    setRegLocalPreset('Patio Central');
-    setRegLocalMenu([]);
+    setRegLocalLat(-33.4581);
+    setRegLocalLng(-70.6642);
     setIsRegModalOpen(false);
   };
 
@@ -180,36 +182,20 @@ export default function VendedorView({
                     className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                   />
                 </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <div>
-                    <label className="text-[8px] text-slate-400 dark:text-slate-550 uppercase tracking-widest font-bold block mb-1">Categoría</label>
-                    <select
-                      value={regLocalCategoria}
-                      onChange={(e) => setRegLocalCategoria(e.target.value)}
-                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-bold transition-colors"
-                    >
-                      <option value="Casino">Casino</option>
-                      <option value="Cafetería">Cafetería</option>
-                      <option value="Comida Rápida">Comida Rápida</option>
-                      <option value="Casero">Casero</option>
-                      <option value="Dulces">Dulces</option>
-                      <option value="Saludable">Saludable</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="text-[8px] text-slate-400 dark:text-slate-550 uppercase tracking-widest font-bold block mb-1">Ubicación (Presets)</label>
-                    <select
-                      value={regLocalPreset}
-                      onChange={(e) => setRegLocalPreset(e.target.value)}
-                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-bold transition-colors"
-                    >
-                      {Object.keys(locationPresets).map(preset => (
-                        <option key={preset} value={preset}>{preset}</option>
-                      ))}
-                    </select>
-                  </div>
+                <div>
+                  <label className="text-[8px] text-slate-400 dark:text-slate-555 uppercase tracking-widest font-bold block mb-1">Categoría</label>
+                  <select
+                    value={regLocalCategoria}
+                    onChange={(e) => setRegLocalCategoria(e.target.value)}
+                    className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-bold transition-colors"
+                  >
+                    <option value="Casino">Casino</option>
+                    <option value="Cafetería">Cafetería</option>
+                    <option value="Comida Rápida">Comida Rápida</option>
+                    <option value="Casero">Casero</option>
+                    <option value="Dulces">Dulces</option>
+                    <option value="Saludable">Saludable</option>
+                  </select>
                 </div>
 
                 <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl">
@@ -222,45 +208,39 @@ export default function VendedorView({
                   />
                 </div>
 
-                {/* Add initial products */}
-                <div className="border-t border-slate-150 dark:border-slate-850 pt-3">
-                  <span className="text-[8px] text-slate-400 dark:text-slate-550 uppercase tracking-widest font-bold block mb-2">Menú Inicial ({regLocalMenu.length} items)</span>
-                  
-                  <div className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      placeholder="Producto"
-                      value={tempItemName}
-                      onChange={(e) => setTempItemName(e.target.value)}
-                      className="flex-1 text-[11px] p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Precio"
-                      value={tempItemPrice}
-                      onChange={(e) => setTempItemPrice(e.target.value)}
-                      className="w-16 text-[11px] p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
-                    />
-                    <button
-                      type="button"
-                      onClick={handleAddTempItem}
-                      className="px-3 bg-slate-850 text-white rounded-lg text-xs font-bold"
+                {/* Leaflet Map coordinates picker */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-[9px] text-slate-400 dark:text-slate-550 uppercase tracking-widest font-extrabold block">
+                    Ubicación Geográfica (Clic para marcar)
+                  </label>
+                  <div className="h-32 w-full rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 relative z-10">
+                    <MapContainer 
+                      center={[-33.4581, -70.6642]} 
+                      zoom={16} 
+                      style={{ height: '100%', width: '100%' }}
+                      zoomControl={false}
                     >
-                      +
-                    </button>
+                      <TileLayer
+                        attribution='&copy; OpenStreetMap contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <MapClickEvents onClick={(latlng) => {
+                        setRegLocalLat(parseFloat(latlng.lat.toFixed(6)));
+                        setRegLocalLng(parseFloat(latlng.lng.toFixed(6)));
+                      }} />
+                      <Marker position={[regLocalLat, regLocalLng]} icon={pickerIcon} />
+                    </MapContainer>
                   </div>
-
-                  {/* Temp menu list */}
-                  {regLocalMenu.length > 0 && (
-                    <div className="flex flex-col gap-1 max-h-24 overflow-y-auto p-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-205 rounded-xl text-[10px]">
-                      {regLocalMenu.map((item, idx) => (
-                        <div key={idx} className="flex justify-between font-mono">
-                          <span>{item.item}</span>
-                          <span>${item.precio}</span>
-                        </div>
-                      ))}
+                  <div className="grid grid-cols-2 gap-2 text-[9px] text-slate-450">
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-1.5 flex justify-between items-center">
+                      <span>Latitud:</span>
+                      <span className="font-mono font-bold text-slate-700 dark:text-slate-200">{regLocalLat}</span>
                     </div>
-                  )}
+                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-1.5 flex justify-between items-center">
+                      <span>Longitud:</span>
+                      <span className="font-mono font-bold text-slate-700 dark:text-slate-200">{regLocalLng}</span>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex gap-3 border-t border-slate-200 dark:border-slate-800 pt-4 mt-2">
@@ -268,7 +248,8 @@ export default function VendedorView({
                     type="button"
                     onClick={() => {
                       setRegLocalNombre('');
-                      setRegLocalMenu([]);
+                      setRegLocalLat(-33.4581);
+                      setRegLocalLng(-70.6642);
                       setIsRegModalOpen(false);
                     }}
                     className="flex-1 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 rounded-xl text-[10px] font-bold transition-all"
@@ -308,11 +289,11 @@ export default function VendedorView({
         
         <div className="flex flex-col gap-4">
           
-          {/* Dropdown to Identify Local (Visible only if Demo has multiple options) */}
+          {/* Dropdown to Identify Local (Visible only if there are multiple options) */}
           {isDemo && myLocales.length > 1 && (
             <div className="flex flex-col gap-1.5 mb-2">
-              <label className="text-[9px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                Seleccionar Local Aprobado (Demo)
+              <label className="text-[9px] font-extrabold text-slate-400 dark:text-slate-550 uppercase tracking-widest">
+                Seleccionar Local Aprobado
               </label>
               <select
                 value={selectedOption || (activeLocal ? activeLocal.id : '')}

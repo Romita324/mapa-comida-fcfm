@@ -52,7 +52,6 @@ export default function ProfileDrawer({
   const [localNombre, setLocalNombre] = useState('');
   const [localCategoria, setLocalCategoria] = useState('Almuerzos');
   const [localJunaeb, setLocalJunaeb] = useState(false);
-  const [menuItems, setMenuItems] = useState([{ item: '', precio: '' }]);
   const [localLat, setLocalLat] = useState(-33.4581);
   const [localLng, setLocalLng] = useState(-70.6642);
 
@@ -74,45 +73,20 @@ export default function ProfileDrawer({
   // Handle Vendedor Local Request Submit
   const handleLocalSubmit = (e) => {
     e.preventDefault();
-    // Filter out empty menu items
-    const finalMenu = menuItems
-      .filter(item => item.item.trim() !== '' && item.precio !== '')
-      .map(item => ({ item: item.item, precio: parseInt(item.precio) }));
-
-    if (finalMenu.length === 0) {
-      alert("Por favor agrega al menos un plato/item al menú.");
-      return;
-    }
 
     onRegisterNewLocal({
       nombre: localNombre,
       categoria: localCategoria,
       aceptaJunaeb: localJunaeb,
       coordenadas: [localLat, localLng],
-      menu: finalMenu
+      menu: []
     });
 
     setLocalNombre('');
     setLocalCategoria('Almuerzos');
     setLocalJunaeb(false);
-    setMenuItems([{ item: '', precio: '' }]);
     setLocalLat(-33.4581);
     setLocalLng(-70.6642);
-  };
-
-  // Menu item helpers
-  const handleAddMenuItem = () => {
-    setMenuItems([...menuItems, { item: '', precio: '' }]);
-  };
-
-  const handleRemoveMenuItem = (index) => {
-    setMenuItems(menuItems.filter((_, i) => i !== index));
-  };
-
-  const handleMenuChange = (index, field, value) => {
-    const updated = [...menuItems];
-    updated[index][field] = value;
-    setMenuItems(updated);
   };
 
   return (
@@ -424,51 +398,6 @@ export default function ProfileDrawer({
                         </div>
                       </div>
 
-                      {/* Menu Editor */}
-                      <div>
-                        <div className="flex justify-between items-center mb-1">
-                          <label className="text-[9px] text-slate-500 dark:text-slate-500 uppercase tracking-widest font-bold">Menú de Comida</label>
-                          <button 
-                            type="button" 
-                            onClick={handleAddMenuItem}
-                            className="text-[9px] text-emerald-500 font-black hover:underline"
-                          >
-                            + Agregar Plato
-                          </button>
-                        </div>
-
-                        <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto pr-1">
-                          {menuItems.map((menuItem, idx) => (
-                            <div key={idx} className="flex items-center gap-1.5">
-                              <input 
-                                type="text" 
-                                required
-                                placeholder="Plato/Bebida"
-                                value={menuItem.item}
-                                onChange={(e) => handleMenuChange(idx, 'item', e.target.value)}
-                                className="flex-1 text-xs p-1.5 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
-                              />
-                              <input 
-                                type="number" 
-                                required
-                                placeholder="Precio ($)"
-                                value={menuItem.precio}
-                                onChange={(e) => handleMenuChange(idx, 'precio', e.target.value)}
-                                className="w-20 text-xs p-1.5 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-mono font-bold transition-colors"
-                              />
-                              {menuItems.length > 1 && (
-                                <button 
-                                  type="button" 
-                                  onClick={() => handleRemoveMenuItem(idx)}
-                                  className="p-1.5 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-lg text-xs"
-                                >
-                                  ✕
-                                </button>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
 
                       <button
                         type="submit"

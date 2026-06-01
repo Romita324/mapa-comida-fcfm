@@ -544,7 +544,7 @@ export default function ProfileView({
                 ? 'Administra tus preferencias, tus locales favoritos y tu postulación a moderador.' 
                 : role === 'vendedor'
                 ? 'Administra tus datos de contacto, contraseña y revisa el estado de tu comercio.'
-                : 'Registra tu perfil en la demo para desbloquear las funcionalidades de personalización.'}
+                : 'Registra tu perfil para desbloquear las funcionalidades de personalización.'}
             </p>
           </div>
         </div>
