@@ -36,6 +36,7 @@ export default function ComensalView({
   const [newComment, setNewComment] = useState('');
   const [mapCenter, setMapCenter] = useState([-33.4581, -70.6642]); // FCFM center
   const [mobileTab, setMobileTab] = useState('mapa'); // 'mapa' | 'lista'
+  const [reportConfirmData, setReportConfirmData] = useState(null);
 
   // Viewport resize tracking to support desktop browser resizing alongside chassis simulated mode
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
@@ -108,8 +109,15 @@ export default function ComensalView({
     });
   };
 
-  // Extract unique categories for filter
-  const categories = ['All', ...new Set(locales.map(l => l.categoria))];
+  // Extract unique categories dynamically based on visible locals (except category filter itself)
+  const visibleLocalesForCategories = locales.filter(local => {
+    if (local.distanciaKm > maxDistance) return false;
+    if (filterJunaeb && !local.aceptaJunaeb) return false;
+    if (filterFavorites && !isGuest && !favoritos.includes(local.id)) return false;
+    if (filterStatus !== 'All' && local.estadoServicio !== filterStatus) return false;
+    return true;
+  });
+  const categories = ['All', ...new Set(visibleLocalesForCategories.map(l => l.categoria))];
 
   const handleSelectLocal = (local) => {
     setSelectedLocal(local);
@@ -835,7 +843,7 @@ export default function ComensalView({
                               if (isGuest) {
                                 alert("Debes estar registrado como Comensal para reportar trolls.");
                               } else {
-                                onReportReview(review.id);
+                                setReportConfirmData(review.id);
                               }
                             }}
                             disabled={isGuest}
@@ -912,6 +920,38 @@ export default function ComensalView({
           </div>
         )}
       </div>
+      {/* Report Troll Confirmation Modal */}
+      {reportConfirmData && (
+        <div className="fixed inset-0 z-[10003] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative animate-scale-up text-center flex flex-col gap-4">
+            <span className="text-3xl block">🚨</span>
+            <h3 className="text-sm font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">¿Reportar Comentario?</h3>
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed">
+              ¿Estás seguro de que deseas reportar este comentario como malicioso/troll? Será enviado al equipo de administración para su evaluación.
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setReportConfirmData(null)}
+                className="flex-1 py-2 border border-slate-350 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-355 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl text-[10px] font-bold transition-all active:scale-[0.98]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onReportReview(reportConfirmData);
+                  setReportConfirmData(null);
+                }}
+                className="flex-1 py-2 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-[10px] font-black shadow-md transition-all active:scale-[0.98]"
+              >
+                Reportar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
