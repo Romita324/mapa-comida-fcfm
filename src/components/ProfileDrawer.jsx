@@ -1,4 +1,28 @@
 import { useState } from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+
+function MapClickEvents({ onClick }) {
+  useMapEvents({
+    click(e) {
+      onClick(e.latlng);
+    },
+  });
+  return null;
+}
+
+const pickerIcon = typeof window !== 'undefined' && L ? L.divIcon({
+  html: `
+    <div class="flex flex-col items-center justify-start w-[80px] h-[40px]">
+      <div class="relative flex items-center justify-center w-6 h-6 rounded-full border-2 border-amber-300 bg-amber-500 text-slate-950 shadow-md ring-2 ring-amber-500/25">
+        <span class="text-[10px]">📍</span>
+      </div>
+    </div>
+  `,
+  className: 'custom-map-marker-container',
+  iconSize: [80, 40],
+  iconAnchor: [40, 20]
+}) : null;
 
 export default function ProfileDrawer({
   isOpen,
@@ -29,6 +53,8 @@ export default function ProfileDrawer({
   const [localCategoria, setLocalCategoria] = useState('Almuerzos');
   const [localJunaeb, setLocalJunaeb] = useState(false);
   const [menuItems, setMenuItems] = useState([{ item: '', precio: '' }]);
+  const [localLat, setLocalLat] = useState(-33.4581);
+  const [localLng, setLocalLng] = useState(-70.6642);
 
   if (!isOpen) return null;
 
@@ -62,6 +88,7 @@ export default function ProfileDrawer({
       nombre: localNombre,
       categoria: localCategoria,
       aceptaJunaeb: localJunaeb,
+      coordenadas: [localLat, localLng],
       menu: finalMenu
     });
 
@@ -69,6 +96,8 @@ export default function ProfileDrawer({
     setLocalCategoria('Almuerzos');
     setLocalJunaeb(false);
     setMenuItems([{ item: '', precio: '' }]);
+    setLocalLat(-33.4581);
+    setLocalLng(-70.6642);
   };
 
   // Menu item helpers
@@ -159,7 +188,7 @@ export default function ProfileDrawer({
                       onChange={(e) => setRegRole(e.target.value)}
                       className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-805 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 font-bold transition-colors"
                     >
-                      <option value="comensal">Comensal / Estudiante</option>
+                      <option value="comensal">Comensal</option>
                       <option value="vendedor">Vendedor / Locatario</option>
                     </select>
                   </div>
@@ -305,11 +334,18 @@ export default function ProfileDrawer({
                     )}
                   </div>
                 ) : (
-                  <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800/80">
-                    <h4 className="text-xs font-black text-slate-700 dark:text-slate-200 mb-1">Registrar Nuevo Local</h4>
-                    <p className="text-[9px] text-slate-400 dark:text-slate-500 mb-3 leading-normal">
-                      Somete a evaluación del Administrador tu local de comida. Tras la aprobación, aparecerás en el mapa oficial.
-                    </p>
+                  <div className="bg-slate-50 dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800/80 flex flex-col gap-3">
+                    <div>
+                      <h4 className="text-xs font-black text-slate-700 dark:text-slate-200 mb-1">Registrar Nuevo Local</h4>
+                      <p className="text-[9px] text-slate-400 dark:text-slate-500 leading-normal">
+                        Somete a evaluación del Administrador tu local de comida. Tras la aprobación, aparecerás en el mapa oficial.
+                      </p>
+                    </div>
+
+                    {/* 1:1 Restriction Info Box */}
+                    <div className="bg-slate-100 dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-850 text-[8.5px] text-slate-400 dark:text-slate-500 leading-normal text-left">
+                      ⚠️ **Aviso de Restricción 1:1**: Cada cuenta de locatario está restringida a gestionar única y estrictamente un solo local de comida (las franquicias o cadenas múltiples están deshabilitadas).
+                    </div>
 
                     <form onSubmit={handleLocalSubmit} className="flex flex-col gap-3">
                       <div>
@@ -349,6 +385,41 @@ export default function ProfileDrawer({
                               onChange={(e) => setLocalJunaeb(e.target.checked)}
                               className="w-4 h-4 rounded text-emerald-500 accent-emerald-500 border-slate-200 dark:border-slate-800"
                             />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Leaflet Map coordinates picker */}
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-extrabold block">
+                          Ubicación Geográfica (Clic para marcar)
+                        </label>
+                        <div className="h-32 w-full rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 relative z-10">
+                          <MapContainer 
+                            center={[-33.4581, -70.6642]} 
+                            zoom={16} 
+                            style={{ height: '100%', width: '100%' }}
+                            zoomControl={false}
+                          >
+                            <TileLayer
+                              attribution='&copy; OpenStreetMap contributors'
+                              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                            />
+                            <MapClickEvents onClick={(latlng) => {
+                              setLocalLat(parseFloat(latlng.lat.toFixed(6)));
+                              setLocalLng(parseFloat(latlng.lng.toFixed(6)));
+                            }} />
+                            <Marker position={[localLat, localLng]} icon={pickerIcon} />
+                          </MapContainer>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-[9px] text-slate-400">
+                          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-1.5 flex justify-between items-center">
+                            <span>Latitud:</span>
+                            <span className="font-mono font-bold text-slate-700 dark:text-slate-200">{localLat}</span>
+                          </div>
+                          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-1.5 flex justify-between items-center">
+                            <span>Longitud:</span>
+                            <span className="font-mono font-bold text-slate-700 dark:text-slate-200">{localLng}</span>
                           </div>
                         </div>
                       </div>
