@@ -4,7 +4,8 @@ export default function VendedorView({
   locales, 
   onUpdateLocalStatus,
   registeredUser,
-  onUpdateLocalMenu
+  onUpdateLocalMenu,
+  onUpdateLocalTags
 }) {
   const isDemo = !registeredUser || registeredUser.username === 'vendedor_demo';
   
@@ -125,6 +126,17 @@ export default function VendedorView({
           {activeLocal && (
             <div className="flex flex-col gap-4">
               
+              {/* Account Restriction Warning */}
+              <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 flex gap-2.5 items-start text-left">
+                <span className="text-xs shrink-0 mt-0.5">⚠️</span>
+                <div>
+                  <h4 className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">Restricción de Cuenta Locatario</h4>
+                  <p className="text-[8.5px] text-slate-400 dark:text-slate-500 mt-1 leading-relaxed">
+                    Tu cuenta de Vendedor tiene una **relación estricta de 1:1** con este local de comida. La gestión de múltiples franquicias o cadenas de locales queda fuera del alcance de la demo.
+                  </p>
+                </div>
+              </div>
+
               {/* Local Info Badge */}
               <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-805 rounded-2xl p-4 transition-colors">
                 <div className="flex items-center justify-between">
@@ -205,6 +217,41 @@ export default function VendedorView({
                   <p className="text-[9px] text-slate-400 dark:text-slate-500/80 leading-relaxed mt-1 text-center italic">
                     Al presionar cualquiera de los chips de arriba, el estado en vivo de tu local cambiará inmediatamente en el mapa de los comensales.
                   </p>
+
+                  {/* Etiquetas del Local */}
+                  <div className="border-t border-slate-100 dark:border-slate-800 pt-3 mt-2 flex flex-col gap-2 text-left">
+                    <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                      Etiquetas del Local
+                    </h4>
+                    <p className="text-[9px] text-slate-400 dark:text-slate-500/80 leading-normal">
+                      Selecciona las etiquetas de alimentos asociadas a tu local:
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {['Vegana', 'Hipocalórica', 'Sin Gluten', 'Apto para Celíacos', 'Vegetariana', 'Saludable', 'Bajo en Sodio', 'Casero'].map(tag => {
+                        const hasTag = (activeLocal.tags || []).includes(tag);
+                        return (
+                          <button
+                            key={tag}
+                            type="button"
+                            onClick={() => {
+                              const currentTags = activeLocal.tags || [];
+                              const updatedTags = hasTag
+                                ? currentTags.filter(t => t !== tag)
+                                : [...currentTags, tag];
+                              onUpdateLocalTags(activeLocal.id, updatedTags);
+                            }}
+                            className={`px-2 py-1 rounded-lg text-[9px] font-extrabold uppercase transition-all border ${
+                              hasTag
+                                ? 'bg-emerald-100 dark:bg-emerald-950/70 border-emerald-300 dark:border-emerald-900 text-emerald-800 dark:text-emerald-400'
+                                : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200'
+                            }`}
+                          >
+                            {hasTag ? `✓ ${tag}` : `+ ${tag}`}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
               )}
 
@@ -332,10 +379,10 @@ export default function VendedorView({
                 <button
                   type="button"
                   onClick={() => handleToggleStock(confirmItem)}
-                  className={`flex-1 py-2 text-slate-950 rounded-xl text-[10px] font-black shadow-md transition-all active:scale-[0.98] ${
+                  className={`flex-1 py-2 rounded-xl text-[10px] font-black shadow-md transition-all active:scale-[0.98] ${
                     confirmItem.agotado 
-                      ? 'bg-gradient-to-r from-emerald-400 to-teal-500'
-                      : 'bg-gradient-to-r from-rose-450 to-rose-500 text-white'
+                      ? 'bg-emerald-500 hover:bg-emerald-600 text-slate-950'
+                      : 'bg-rose-500 hover:bg-rose-600 text-white'
                   }`}
                 >
                   Confirmar
