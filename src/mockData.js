@@ -65,7 +65,8 @@ export const reseñas = [
     usuario: "javiera_fcfm",
     calificacion: 5,
     comentario: "El tío siempre salva con los completos después de un control.",
-    reportado: false
+    reportado: false,
+    votosUtilidad: 42
   },
   {
     id: 102,
@@ -73,7 +74,8 @@ export const reseñas = [
     usuario: "diego_inge",
     calificacion: 3,
     comentario: "La comida es buena, pero la fila para pagar el ticket es eterna.",
-    reportado: false
+    reportado: false,
+    votosUtilidad: 28
   },
   {
     id: 103,
@@ -81,7 +83,26 @@ export const reseñas = [
     usuario: "bot_troll_99",
     calificacion: 1,
     comentario: "Este lugar no existe, vayan a mi local mejor.",
-    reportado: false
+    reportado: false,
+    votosUtilidad: 1
+  },
+  {
+    id: 104,
+    localId: 2,
+    usuario: "camila_fcfm",
+    calificacion: 4,
+    comentario: "Tienen opciones vegetarianas y el postre de manzana es increíble.",
+    reportado: false,
+    votosUtilidad: 35
+  },
+  {
+    id: 105,
+    localId: 4,
+    usuario: "antonio_fcfm",
+    calificacion: 5,
+    comentario: "Los bowls de falafel son abundantes y sanos. ¡Muy recomendado!",
+    reportado: false,
+    votosUtilidad: 19
   }
 ];
 

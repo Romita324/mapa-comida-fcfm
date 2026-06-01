@@ -13,75 +13,167 @@ function ChangeView({ center }) {
   return null;
 }
 
-export default function ComensalView({ locales, reseñas, onReportReview }) {
+export default function ComensalView({ 
+  locales, 
+  reseñas, 
+  onReportReview,
+  favoritos,
+  onToggleFavorite,
+  isGuest,
+  theme,
+  deviceMode
+}) {
   const [selectedLocal, setSelectedLocal] = useState(null);
+  const [isFloatingFiltersOpen, setIsFloatingFiltersOpen] = useState(false);
   const [filterJunaeb, setFilterJunaeb] = useState(false);
   const [filterCategory, setFilterCategory] = useState('All');
-  const [maxDistance, setMaxDistance] = useState(3.0); // Limit up to strict 3.0 km
+  const [maxDistance, setMaxDistance] = useState(3.0); // Capped at strict 3.0 km
+  const [filterFavorites, setFilterFavorites] = useState(false);
   const [mapCenter, setMapCenter] = useState([-33.4581, -70.6642]); // FCFM center
+  const [mobileTab, setMobileTab] = useState('mapa'); // 'mapa' | 'lista'
 
-  // Extract unique categories for filter
-  const categories = ['All', ...new Set(locales.map(l => l.categoria))];
+  // Viewport resize tracking to support desktop browser resizing alongside chassis simulated mode
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const isMobile = deviceMode === 'mobile' || windowWidth < 1024;
+
+
 
   // Apply filters
   const filteredLocales = locales.filter(local => {
-    // 1. Distance filter (strictly capped at 3.0 km as per request, dynamic based on slider)
+    // 1. Distance filter (strictly capped at 3.0 km, slider dynamic)
     if (local.distanciaKm > maxDistance) return false;
     // 2. JUNAEB filter
     if (filterJunaeb && !local.aceptaJunaeb) return false;
     // 3. Category filter
     if (filterCategory !== 'All' && local.categoria !== filterCategory) return false;
+    // 4. Favorites filter
+    if (filterFavorites && !isGuest && !favoritos.includes(local.id)) return false;
     return true;
   });
 
   // Custom marker generator using SVG and Tailwind
   const getMarkerIcon = (local) => {
+    const isFav = !isGuest && favoritos.includes(local.id);
     let color = 'bg-emerald-500 text-slate-950 border-emerald-300 ring-emerald-500/25';
     if (local.estadoServicio === 'Cerrado') {
       color = 'bg-rose-500 text-white border-rose-300 ring-rose-500/25';
     } else if (local.estadoServicio === 'Sin Stock') {
       color = 'bg-amber-500 text-slate-950 border-amber-300 ring-amber-500/25';
+    } else if (local.estadoServicio === 'Colación') {
+      color = 'bg-orange-500 text-white border-orange-300 ring-orange-500/25';
     }
 
     const junaebBadge = local.aceptaJunaeb
-      ? `<span class="absolute -top-1.5 -right-1.5 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-emerald-600 text-[8px] font-black border border-slate-900 text-white shadow-md">J</span>`
+      ? `<span class="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-600 text-[8px] font-black border border-white dark:border-slate-950 text-white shadow-md">J</span>`
+      : '';
+
+    const favHeart = isFav
+      ? `<span class="absolute -bottom-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-600 border border-white dark:border-slate-950 text-white shadow-md text-[8px]">❤️</span>`
       : '';
 
     const html = `
-      <div class="relative flex items-center justify-center w-8 h-8 rounded-full border-2 shadow-lg ring-4 transform transition-all duration-300 hover:scale-125 ${color}">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
-        </svg>
-        ${junaebBadge}
+      <div class="flex flex-col items-center justify-start w-[120px] h-[60px]">
+        <div class="relative flex items-center justify-center w-8 h-8 rounded-full border-2 shadow-lg ring-4 transform transition-all duration-300 hover:scale-125 ${color}">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z" />
+          </svg>
+          ${junaebBadge}
+          ${favHeart}
+        </div>
+        <div class="mt-1 px-1.5 py-0.5 rounded bg-slate-900/90 dark:bg-slate-950/90 border border-slate-700/50 dark:border-slate-800/80 text-[8px] font-extrabold text-white text-center shadow-md truncate max-w-[110px] leading-tight select-none pointer-events-none">
+          ${local.nombre}
+        </div>
       </div>
     `;
 
     return L.divIcon({
       html: html,
       className: 'custom-map-marker-container',
-      iconSize: [32, 32],
-      iconAnchor: [16, 16],
+      iconSize: [120, 60],
+      iconAnchor: [60, 16],
       popupAnchor: [0, -16]
     });
   };
 
+  // Extract unique categories for filter
+  const categories = ['All', ...new Set(locales.map(l => l.categoria))];
+
   const handleSelectLocal = (local) => {
     setSelectedLocal(local);
     setMapCenter(local.coordenadas);
+    setMobileTab('mapa');
   };
+  // Determine dynamic Leaflet tile layer URL based on active theme
+  // We'll force updates by checking if dark class exists on document
+  const isDarkMode = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const tileUrl = isDarkMode
+    ? "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+    : "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col lg:flex-row gap-6 h-[calc(100vh-100px)]">
+    <div className={`w-full h-full flex-1 min-h-0 transition-colors duration-200 overflow-hidden flex ${
+      isMobile ? 'flex-col p-4 gap-4' : 'flex-row p-6 gap-6'
+    }`}>
       
-      {/* LEFT COLUMN: Filters & List */}
-      <div className="w-full lg:w-96 flex flex-col gap-4 overflow-y-auto pr-2 custom-scrollbar">
+      {/* Tab Switcher for Mobile */}
+      <div className={`bg-slate-100 dark:bg-slate-950 p-1 rounded-xl border border-slate-200 dark:border-slate-800 w-full shrink-0 mb-1 ${
+        isMobile ? 'flex' : 'hidden'
+      }`}>
+        <button
+          onClick={() => setMobileTab('mapa')}
+          className={`flex-1 flex items-center justify-center space-x-2 py-2 rounded-lg text-xs font-bold transition-all ${
+            mobileTab === 'mapa'
+              ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          <span>🗺️ Ver Mapa</span>
+        </button>
+        <button
+          onClick={() => setMobileTab('lista')}
+          className={`flex-1 flex items-center justify-center space-x-2 py-2 rounded-lg text-xs font-bold transition-all ${
+            mobileTab === 'lista'
+              ? 'bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-sm border border-slate-200/50 dark:border-slate-800/50'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+          }`}
+        >
+          <span>🏪 Ver Locales</span>
+        </button>
+      </div>
+
+      {/* LEFT COLUMN: Filters, Favoritos & List */}
+      <div className={`gap-4 overflow-y-auto pr-1 select-none scrollbar-thin ${
+        isMobile 
+          ? (mobileTab === 'lista' ? 'flex flex-col flex-1 h-full w-full' : 'hidden')
+          : 'flex flex-col w-96 h-full flex-none'
+      }`}>
+        
+        {/* Guest Warning Card */}
+        {isGuest && (
+          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900 rounded-2xl p-4 flex gap-3 shadow-sm">
+            <span className="text-xl">👤</span>
+            <div>
+              <h4 className="text-xs font-bold text-amber-800 dark:text-amber-400">Perfil de Invitado</h4>
+              <p className="text-[10px] text-amber-700/80 dark:text-amber-500/80 mt-0.5 leading-normal">
+                Visualizas el mapa en modo de solo lectura. Regístrate como comensal para agregar favoritos, enviar reportes anti-troll y postular como moderador.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Filters Box */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col gap-4">
-          <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-            <h2 className="text-lg font-bold text-slate-100">Filtros de Búsqueda</h2>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col gap-4 transition-colors">
+          <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+            <h2 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">Filtros de Búsqueda</h2>
             <button 
-              onClick={() => { setFilterJunaeb(false); setFilterCategory('All'); setMaxDistance(3.0); }}
-              className="text-xs text-emerald-400 hover:text-emerald-300 font-semibold transition-colors"
+              onClick={() => { setFilterJunaeb(false); setFilterCategory('All'); setMaxDistance(3.0); setFilterFavorites(false); }}
+              className="text-[10px] text-emerald-500 hover:text-emerald-400 font-bold transition-colors"
             >
               Restablecer
             </button>
@@ -89,16 +181,16 @@ export default function ComensalView({ locales, reseñas, onReportReview }) {
 
           {/* Category Selector */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Categoría</label>
+            <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Categoría</label>
             <div className="flex flex-wrap gap-1.5">
               {categories.map(cat => (
                 <button
                   key={cat}
                   onClick={() => setFilterCategory(cat)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${
                     filterCategory === cat
-                      ? 'bg-slate-100 text-slate-950 font-bold'
-                      : 'bg-slate-950 text-slate-400 hover:text-slate-200 hover:bg-slate-950/80 border border-slate-800'
+                      ? 'bg-slate-900 dark:bg-slate-100 border-slate-900 dark:border-slate-100 text-white dark:text-slate-950 font-black'
+                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                   }`}
                 >
                   {cat === 'All' ? 'Todas' : cat}
@@ -109,9 +201,9 @@ export default function ComensalView({ locales, reseñas, onReportReview }) {
 
           {/* Distance Slider (Capped strictly at 3.0 km) */}
           <div className="flex flex-col gap-1.5">
-            <div className="flex justify-between text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="flex justify-between text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
               <span>Distancia Máxima</span>
-              <span className="text-emerald-400 font-bold font-mono">{maxDistance.toFixed(1)} km</span>
+              <span className="text-emerald-500 dark:text-emerald-400 font-extrabold font-mono">{maxDistance.toFixed(1)} km</span>
             </div>
             <input
               type="range"
@@ -120,85 +212,135 @@ export default function ComensalView({ locales, reseñas, onReportReview }) {
               step="0.1"
               value={maxDistance}
               onChange={(e) => setMaxDistance(parseFloat(e.target.value))}
-              className="w-full h-1.5 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+              className="w-full h-1 bg-slate-200 dark:bg-slate-950 rounded-lg appearance-none cursor-pointer accent-emerald-500"
             />
-            <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+            <div className="flex justify-between text-[9px] text-slate-400 dark:text-slate-500 font-mono">
               <span>0.1 km</span>
               <span>1.5 km</span>
-              <span>3.0 km</span>
+              <span>3.0 km (Geofencing)</span>
             </div>
           </div>
 
-          {/* Junaeb Toggle */}
-          <div className="flex items-center justify-between bg-slate-950 p-3 rounded-xl border border-slate-800 transition-colors hover:border-slate-700">
-            <div className="flex items-center space-x-2.5">
-              <span className="flex h-5 w-5 items-center justify-center rounded bg-emerald-950 border border-emerald-800 text-[10px] font-black text-emerald-400">J</span>
-              <div>
-                <p className="text-xs font-bold text-slate-200">Acepta JUNAEB</p>
-                <p className="text-[10px] text-slate-500">Solo mostrar locales adheridos</p>
+          {/* Junaeb and Favorites Filters */}
+          <div className="flex flex-col gap-2.5">
+            {/* JUNAEB Filter Button */}
+            <button
+              type="button"
+              onClick={() => setFilterJunaeb(!filterJunaeb)}
+              className={`flex items-center justify-between p-2.5 rounded-xl border transition-all duration-150 active:scale-[0.98] w-full text-left cursor-pointer ${
+                filterJunaeb 
+                  ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100 font-extrabold ring-1 ring-emerald-400/20'
+                  : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
+              }`}
+            >
+              <div className="flex items-center space-x-2">
+                <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-black border transition-colors ${
+                  filterJunaeb 
+                    ? 'bg-emerald-500 text-slate-950 border-emerald-500'
+                    : 'bg-emerald-100 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400'
+                }`}>J</span>
+                <div>
+                  <p className="text-xs font-bold leading-none">Acepta JUNAEB</p>
+                </div>
               </div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input 
-                type="checkbox" 
-                checked={filterJunaeb} 
-                onChange={(e) => setFilterJunaeb(e.target.checked)}
-                className="sr-only peer" 
-              />
-              <div className="w-9 h-5 bg-slate-850 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500 peer-checked:after:bg-slate-950 peer-checked:after:border-slate-950"></div>
-            </label>
+              <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase transition-colors ${
+                filterJunaeb
+                  ? 'bg-emerald-500 text-slate-950'
+                  : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+              }`}>
+                {filterJunaeb ? 'Activo' : 'Filtrar'}
+              </span>
+            </button>
+
+            {/* FAVORITES Filter Button */}
+            {!isGuest && (
+              <button
+                type="button"
+                onClick={() => setFilterFavorites(!filterFavorites)}
+                className={`flex items-center justify-between p-2.5 rounded-xl border transition-all duration-150 active:scale-[0.98] w-full text-left cursor-pointer ${
+                  filterFavorites 
+                    ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-450 dark:border-rose-700 text-rose-900 dark:text-rose-100 font-extrabold ring-1 ring-rose-400/20'
+                    : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
+                }`}
+              >
+                <div className="flex items-center space-x-2">
+                  <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-black border transition-colors ${
+                    filterFavorites 
+                      ? 'bg-rose-500 text-slate-950 border-rose-500'
+                      : 'bg-rose-100 dark:bg-rose-950/60 border-rose-300 dark:border-rose-900 text-rose-600 dark:text-rose-400'
+                  }`}>❤️</span>
+                  <div>
+                    <p className="text-xs font-bold leading-none">Mis Favoritos</p>
+                  </div>
+                </div>
+                <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase transition-colors ${
+                  filterFavorites
+                    ? 'bg-rose-500 text-slate-950'
+                    : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                }`}>
+                  {filterFavorites ? 'Activo' : 'Filtrar'}
+                </span>
+              </button>
+            )}
           </div>
         </div>
 
         {/* Locales List */}
         <div className="flex flex-col gap-2">
-          <p className="text-xs font-semibold text-slate-400 px-1 font-mono">
-            LOCALES ENCONTRADOS: {filteredLocales.length}
+          <p className="text-[10px] font-extrabold text-slate-400 dark:text-slate-500 px-1 font-mono uppercase tracking-wider">
+            Locales Encontrados: {filteredLocales.length}
           </p>
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-2">
             {filteredLocales.map(local => {
               const reviewsCount = reseñas.filter(r => r.localId === local.id).length;
+              const isFav = !isGuest && favoritos.includes(local.id);
               return (
                 <div
                   key={local.id}
                   onClick={() => handleSelectLocal(local)}
-                  className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 flex flex-col gap-2 ${
+                  className={`p-3.5 rounded-2xl border cursor-pointer transition-all duration-150 flex flex-col gap-2 relative ${
                     selectedLocal?.id === local.id
-                      ? 'bg-slate-900 border-emerald-500 shadow-md shadow-emerald-500/5'
-                      : 'bg-slate-900 border-slate-800 hover:border-slate-700 hover:bg-slate-900/80'
+                      ? 'bg-slate-100 dark:bg-slate-900 border-emerald-500 shadow-md'
+                      : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                   }`}
                 >
-                  <div className="flex justify-between items-start">
+                  {/* Favorite mini heart */}
+                  {isFav && (
+                    <span className="absolute top-3.5 right-3.5 text-xs">❤️</span>
+                  )}
+
+                  <div className="flex justify-between items-start pr-6">
                     <div>
-                      <h3 className="font-bold text-slate-100 text-sm leading-tight">{local.nombre}</h3>
-                      <p className="text-xs text-slate-400 mt-0.5">{local.categoria}</p>
+                      <h3 className="font-extrabold text-slate-800 dark:text-slate-100 text-xs leading-snug">{local.nombre}</h3>
+                      <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{local.categoria}</p>
                     </div>
-                    {/* Status Badge */}
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide shrink-0 ${
                       local.estadoServicio === 'Abierto'
-                        ? 'bg-emerald-950 text-emerald-400 border border-emerald-900'
+                        ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900'
+                        : local.estadoServicio === 'Colación'
+                        ? 'bg-orange-100 dark:bg-orange-950/70 text-orange-850 dark:text-orange-400 border border-orange-200 dark:border-orange-900/50'
                         : local.estadoServicio === 'Sin Stock'
-                        ? 'bg-amber-950 text-amber-400 border border-amber-900'
-                        : 'bg-rose-950 text-rose-400 border border-rose-900'
+                        ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900'
+                        : 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-400 border border-rose-200 dark:border-rose-900'
                     }`}>
                       {local.estadoServicio}
                     </span>
                   </div>
 
-                  <div className="flex justify-between items-center mt-1 pt-2 border-t border-slate-950 text-xs text-slate-400 font-medium">
+                  <div className="flex justify-between items-center mt-0.5 pt-2 border-t border-slate-100 dark:border-slate-800 text-[10px] text-slate-400 dark:text-slate-500 font-bold">
                     <span className="flex items-center space-x-1 font-mono">
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-3.5 h-3.5 text-slate-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
                         <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                       </svg>
                       <span>{local.distanciaKm} km</span>
                     </span>
                     {local.aceptaJunaeb && (
-                      <span className="text-[10px] text-emerald-400 bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-900/60 font-bold">
+                      <span className="text-[8px] text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-300 dark:border-emerald-900 font-extrabold">
                         JUNAEB
                       </span>
                     )}
-                    <span className="text-slate-500 font-mono text-[10px]">
+                    <span className="text-slate-400 dark:text-slate-500 font-mono text-[9px] font-medium">
                       {reviewsCount} {reviewsCount === 1 ? 'reseña' : 'reseñas'}
                     </span>
                   </div>
@@ -206,12 +348,9 @@ export default function ComensalView({ locales, reseñas, onReportReview }) {
               );
             })}
             {filteredLocales.length === 0 && (
-              <div className="bg-slate-900 border border-slate-800 rounded-xl p-8 text-center">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-8 h-8 mx-auto text-slate-600 mb-2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
-                </svg>
-                <p className="text-sm font-semibold text-slate-400">No hay locales que cumplan los filtros.</p>
-                <p className="text-xs text-slate-500 mt-1">Prueba ampliando la distancia o cambiando la categoría.</p>
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 text-center shadow-md">
+                <p className="text-xs font-bold text-slate-500">No hay locales que cumplan los filtros.</p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1">Prueba ampliando el geofencing o cambiando la categoría.</p>
               </div>
             )}
           </div>
@@ -219,21 +358,187 @@ export default function ComensalView({ locales, reseñas, onReportReview }) {
       </div>
 
       {/* RIGHT COLUMN: Map & Detail Side-Drawer */}
-      <div className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden relative shadow-xl h-full flex">
-        {/* React Leaflet Map */}
-        <div className="flex-1 h-full z-10">
+      <div className={`bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden relative shadow-xl transition-colors ${
+        isMobile 
+          ? (mobileTab === 'mapa' ? 'flex flex-1 h-full w-full' : 'hidden')
+          : 'flex flex-1 h-full'
+      }`}>
+        
+        {/* Floating Filters Button for Mobile */}
+        {isMobile && mobileTab === 'mapa' && (
+          <button
+            onClick={() => setIsFloatingFiltersOpen(true)}
+            className="absolute top-4 right-4 z-[1001] px-3.5 py-2.5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md hover:bg-white dark:hover:bg-slate-900 text-slate-800 dark:text-slate-100 font-extrabold text-xs rounded-2xl shadow-lg border border-slate-200 dark:border-slate-800 flex items-center gap-1.5 transition-all active:scale-95"
+          >
+            <span>🔍</span>
+            <span>Filtros</span>
+          </button>
+        )}
+
+        {/* Slide-up Mobile Filters Sheet */}
+        {isMobile && isFloatingFiltersOpen && (
+          <>
+            {/* Backdrop */}
+            <div 
+              className="absolute inset-0 bg-slate-950/60 backdrop-blur-xs z-[1002] animate-fade-in"
+              onClick={() => setIsFloatingFiltersOpen(false)}
+            />
+            
+            {/* Sheet Panel */}
+            <div className="absolute bottom-0 inset-x-0 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 rounded-t-[32px] p-5 pb-8 z-[1003] shadow-2xl flex flex-col gap-4 max-h-[70%] overflow-y-auto animate-slide-in-up scrollbar-none">
+              
+              {/* Header */}
+              <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
+                <div className="flex items-center space-x-1.5">
+                  <span className="text-base">🔍</span>
+                  <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">Filtros de Búsqueda</h3>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <button 
+                    onClick={() => { setFilterJunaeb(false); setFilterCategory('All'); setMaxDistance(3.0); setFilterFavorites(false); }}
+                    className="text-[11px] text-emerald-500 hover:text-emerald-400 font-bold transition-colors"
+                  >
+                    Restablecer
+                  </button>
+                  <button 
+                    onClick={() => setIsFloatingFiltersOpen(false)}
+                    className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+
+              {/* Category Selector */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Categoría</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {categories.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setFilterCategory(cat)}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                        filterCategory === cat
+                          ? 'bg-slate-900 dark:bg-slate-100 border-slate-900 dark:border-slate-100 text-white dark:text-slate-950 font-black'
+                          : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      {cat === 'All' ? 'Todas' : cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Distance Slider */}
+              <div className="flex flex-col gap-1.5">
+                <div className="flex justify-between text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                  <span>Distancia Máxima</span>
+                  <span className="text-emerald-500 dark:text-emerald-400 font-extrabold font-mono">{maxDistance.toFixed(1)} km</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="3.0"
+                  step="0.1"
+                  value={maxDistance}
+                  onChange={(e) => setMaxDistance(parseFloat(e.target.value))}
+                  className="w-full h-1 bg-slate-200 dark:bg-slate-950 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                />
+                <div className="flex justify-between text-[9px] text-slate-400 dark:text-slate-500 font-mono">
+                  <span>0.1 km</span>
+                  <span>1.5 km</span>
+                  <span>3.0 km (Geofencing)</span>
+                </div>
+              </div>
+
+              {/* Toggles */}
+              <div className="flex flex-col gap-2.5">
+                {/* JUNAEB Filter Button */}
+                <button
+                  type="button"
+                  onClick={() => setFilterJunaeb(!filterJunaeb)}
+                  className={`flex items-center justify-between p-2.5 rounded-xl border transition-all duration-150 active:scale-[0.98] w-full text-left cursor-pointer ${
+                    filterJunaeb 
+                      ? 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-400 dark:border-emerald-700 text-emerald-900 dark:text-emerald-100 font-extrabold ring-1 ring-emerald-400/20'
+                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
+                    <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-black border transition-colors ${
+                      filterJunaeb 
+                        ? 'bg-emerald-500 text-slate-950 border-emerald-500'
+                        : 'bg-emerald-100 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400'
+                    }`}>J</span>
+                    <div>
+                      <p className="text-xs font-bold leading-none">Acepta JUNAEB</p>
+                    </div>
+                  </div>
+                  <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase transition-colors ${
+                    filterJunaeb
+                      ? 'bg-emerald-500 text-slate-950'
+                      : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                  }`}>
+                    {filterJunaeb ? 'Activo' : 'Filtrar'}
+                  </span>
+                </button>
+
+                {/* FAVORITES Filter Button */}
+                {!isGuest && (
+                  <button
+                    type="button"
+                    onClick={() => setFilterFavorites(!filterFavorites)}
+                    className={`flex items-center justify-between p-2.5 rounded-xl border transition-all duration-150 active:scale-[0.98] w-full text-left cursor-pointer ${
+                      filterFavorites 
+                        ? 'bg-rose-50 dark:bg-rose-950/30 border-rose-450 dark:border-rose-700 text-rose-900 dark:text-rose-100 font-extrabold ring-1 ring-rose-400/20'
+                        : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className={`flex h-5 w-5 items-center justify-center rounded text-[10px] font-black border transition-colors ${
+                        filterFavorites 
+                          ? 'bg-rose-500 text-slate-950 border-rose-500'
+                          : 'bg-rose-100 dark:bg-rose-950/60 border-rose-300 dark:border-rose-900 text-rose-600 dark:text-rose-400'
+                      }`}>❤️</span>
+                      <div>
+                        <p className="text-xs font-bold leading-none">Mis Favoritos</p>
+                      </div>
+                    </div>
+                    <span className={`text-[9px] px-1.5 py-0.5 rounded font-black uppercase transition-colors ${
+                      filterFavorites
+                        ? 'bg-rose-500 text-slate-950'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                    }`}>
+                      {filterFavorites ? 'Activo' : 'Filtrar'}
+                    </span>
+                  </button>
+                )}
+              </div>
+
+              <button 
+                onClick={() => setIsFloatingFiltersOpen(false)}
+                className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black rounded-xl text-xs shadow-md transition-all active:scale-[0.98] mt-2"
+              >
+                Ver locales filtrados ({filteredLocales.length})
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* Leaflet Map */}
+        <div className="w-full h-full z-10">
           <MapContainer 
+            key={theme} // Force re-render of Leaflet tiles on theme change
             center={[-33.4581, -70.6642]} 
-            zoom={16.5} 
-            style={{ height: '100%', width: '100%', background: '#020617' }}
+            zoom={16} 
+            style={{ height: '100%', width: '100%', background: isDarkMode ? '#020617' : '#f8fafc' }}
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contribuyentes'
-              url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url={tileUrl}
             />
             <ChangeView center={mapCenter} />
 
-            {/* FCFM Landmark Marker */}
+            {/* FCFM Center Landmark Marker */}
             <Marker 
               position={[-33.4581, -70.6642]} 
               icon={L.divIcon({
@@ -248,7 +553,7 @@ export default function ComensalView({ locales, reseñas, onReportReview }) {
               })}
             >
               <Popup>
-                <div className="text-xs font-bold text-slate-950">FCFM Beauchef</div>
+                <div className="text-xs font-black text-slate-900">FCFM Beauchef 850</div>
               </Popup>
             </Marker>
 
@@ -263,13 +568,15 @@ export default function ComensalView({ locales, reseñas, onReportReview }) {
                 }}
               >
                 <Popup>
-                  <div className="text-slate-950">
-                    <h4 className="font-bold text-xs">{local.nombre}</h4>
-                    <p className="text-[10px] text-slate-600 font-medium">{local.categoria}</p>
-                    <div className="mt-1 flex items-center gap-1.5">
-                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-bold ${
+                  <div className="text-slate-900">
+                    <h4 className="font-extrabold text-xs">{local.nombre}</h4>
+                    <p className="text-[9px] text-slate-500 font-semibold">{local.categoria}</p>
+                    <div className="mt-1.5 flex items-center gap-1">
+                      <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase ${
                         local.estadoServicio === 'Abierto'
                           ? 'bg-emerald-100 text-emerald-800'
+                          : local.estadoServicio === 'Colación'
+                          ? 'bg-orange-100 text-orange-850'
                           : local.estadoServicio === 'Sin Stock'
                           ? 'bg-amber-100 text-amber-800'
                           : 'bg-rose-100 text-rose-800'
@@ -277,7 +584,7 @@ export default function ComensalView({ locales, reseñas, onReportReview }) {
                         {local.estadoServicio}
                       </span>
                       {local.aceptaJunaeb && (
-                        <span className="text-[8px] bg-emerald-100 text-emerald-800 px-1 py-0.5 rounded font-black">JUNAEB</span>
+                        <span className="text-[8px] bg-emerald-100 text-emerald-800 px-1 py-0.5 rounded font-black border border-emerald-200">JUNAEB</span>
                       )}
                     </div>
                   </div>
@@ -289,70 +596,105 @@ export default function ComensalView({ locales, reseñas, onReportReview }) {
 
         {/* Side Panel: Local Details (Slides in if local selected) */}
         {selectedLocal && (
-          <div className="absolute right-0 top-0 bottom-0 w-full md:w-96 bg-slate-900/95 border-l border-slate-800 z-20 shadow-2xl p-6 overflow-y-auto flex flex-col gap-5 backdrop-blur">
-            {/* Close Button */}
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div className="absolute right-0 top-0 bottom-0 w-full md:w-96 bg-white/95 dark:bg-slate-900/95 border-l border-slate-200 dark:border-slate-800 z-20 shadow-2xl p-5 overflow-y-auto flex flex-col gap-4 backdrop-blur transition-colors scrollbar-thin">
+            
+            {/* Drawer Header */}
+            <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
               <div>
-                <span className="px-2 py-0.5 bg-slate-950 text-[10px] text-slate-400 rounded-md border border-slate-800 font-mono">Detalles</span>
+                <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-950 text-[9px] font-bold text-slate-500 rounded-md border border-slate-200 dark:border-slate-800 font-mono uppercase tracking-wider">
+                  Detalles
+                </span>
               </div>
-              <button 
-                onClick={() => setSelectedLocal(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-950 border border-slate-800 transition-all"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4 h-4">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex items-center space-x-2">
+                {/* FAVORITES HEART BUTTON */}
+                {!isGuest && (
+                  <button
+                    onClick={() => onToggleFavorite(selectedLocal.id)}
+                    className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-500 transition-colors"
+                    title={favoritos.includes(selectedLocal.id) ? "Quitar de favoritos" : "Agregar a favoritos"}
+                  >
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      fill={favoritos.includes(selectedLocal.id) ? "currentColor" : "none"} 
+                      viewBox="0 0 24 24" 
+                      strokeWidth="2" 
+                      stroke="currentColor" 
+                      className="w-4 h-4"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    </svg>
+                  </button>
+                )}
+
+                <button 
+                  onClick={() => setSelectedLocal(null)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-950 border border-slate-200 dark:border-slate-800 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             {/* Local Information */}
             <div>
               <div className="flex justify-between items-start gap-2">
-                <h3 className="text-xl font-bold text-slate-100 tracking-tight leading-tight">{selectedLocal.nombre}</h3>
-                <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${
+                <h3 className="text-base font-extrabold text-slate-800 dark:text-slate-100 tracking-tight leading-tight">{selectedLocal.nombre}</h3>
+                <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide shrink-0 ${
                   selectedLocal.estadoServicio === 'Abierto'
-                    ? 'bg-emerald-950 text-emerald-400 border border-emerald-900'
+                    ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900'
+                    : selectedLocal.estadoServicio === 'Colación'
+                    ? 'bg-orange-100 dark:bg-orange-950/70 text-orange-850 dark:text-orange-400 border border-orange-200 dark:border-orange-900/50'
                     : selectedLocal.estadoServicio === 'Sin Stock'
-                    ? 'bg-amber-950 text-amber-400 border border-amber-900'
-                    : 'bg-rose-950 text-rose-400 border border-rose-900'
+                    ? 'bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900'
+                    : 'bg-rose-100 dark:bg-rose-950 text-rose-800 dark:text-rose-400 border border-rose-200 dark:border-rose-900'
                 }`}>
                   {selectedLocal.estadoServicio}
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
-                <span className="px-1.5 py-0.5 bg-slate-950 rounded text-slate-500 font-medium">{selectedLocal.categoria}</span>
-                <span className="font-mono text-slate-500">•</span>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-1 flex items-center gap-1.5 font-semibold">
+                <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-950 rounded text-slate-500 dark:text-slate-400 border border-slate-200/50 dark:border-slate-800/50">{selectedLocal.categoria}</span>
+                <span>•</span>
                 <span className="font-mono">{selectedLocal.distanciaKm} km de FCFM</span>
               </p>
 
               {/* Junaeb Callout */}
               {selectedLocal.aceptaJunaeb ? (
-                <div className="mt-3.5 bg-emerald-950/20 border border-emerald-900/60 p-3 rounded-xl flex items-center space-x-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-950 border border-emerald-800 text-[10px] font-black text-emerald-400">J</span>
+                <div className="mt-3.5 bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/60 p-3 rounded-xl flex items-center space-x-3 transition-colors">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-emerald-100 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-900 text-[10px] font-black text-emerald-600 dark:text-emerald-400">J</span>
                   <div>
-                    <h4 className="text-xs font-bold text-emerald-400">¡Acepta Tarjeta Junaeb!</h4>
-                    <p className="text-[10px] text-emerald-400/80">Puedes pagar tu almuerzo con la beca BAES aquí.</p>
+                    <h4 className="text-xs font-bold text-emerald-700 dark:text-emerald-400">¡Convenio JUNAEB Activo!</h4>
+                    <p className="text-[10px] text-emerald-600/80 dark:text-emerald-500">Acepta pago BAES para compras de colación.</p>
                   </div>
                 </div>
               ) : (
-                <div className="mt-3.5 bg-slate-950 p-3 rounded-xl border border-slate-850 flex items-center space-x-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-slate-900 border border-slate-800 text-[10px] font-black text-slate-500">J</span>
+                <div className="mt-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-3 rounded-xl flex items-center space-x-3 transition-colors">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-800 text-[10px] font-black text-slate-400">J</span>
                   <div>
-                    <h4 className="text-xs font-semibold text-slate-400">Sin Convenio Junaeb</h4>
-                    <p className="text-[10px] text-slate-500">Este local actualmente no cuenta con pago BAES.</p>
+                    <h4 className="text-xs font-bold text-slate-500">Sin Convenio JUNAEB</h4>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500/85">No cuenta con soporte de pago de tarjeta BAES.</p>
                   </div>
                 </div>
               )}
             </div>
 
             {/* Menu Section */}
-            <div className="flex flex-col gap-2.5">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Menú del Local</h4>
-              <div className="flex flex-col gap-2 bg-slate-950 p-4 rounded-xl border border-slate-850">
+            <div className="flex flex-col gap-2">
+              <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Menú Oferta</h4>
+              <div className="flex flex-col gap-1.5 bg-slate-50 dark:bg-slate-950 p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors">
                 {selectedLocal.menu && selectedLocal.menu.map((food, i) => (
-                  <div key={i} className="flex justify-between items-center py-1.5 border-b border-slate-900 last:border-b-0">
-                    <span className="text-xs font-semibold text-slate-200">{food.item}</span>
-                    <span className="text-xs font-bold font-mono text-emerald-400 bg-emerald-950/30 px-2 py-0.5 rounded border border-emerald-900/30">
+                  <div key={i} className={`flex justify-between items-center py-1 border-b border-slate-100 dark:border-slate-900/60 last:border-b-0 ${
+                    food.agotado ? 'opacity-40 select-none' : ''
+                  }`}>
+                    <span className={`text-xs font-bold text-slate-700 dark:text-slate-200 ${
+                      food.agotado ? 'line-through text-slate-400 dark:text-slate-500' : ''
+                    }`}>
+                      {food.item} {food.agotado && <span className="text-[9px] text-rose-500 font-extrabold ml-1 uppercase">(Agotado)</span>}
+                    </span>
+                    <span className={`text-xs font-extrabold font-mono px-2 py-0.5 rounded border ${
+                      food.agotado 
+                        ? 'text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-900 border-slate-200 dark:border-slate-800' 
+                        : 'text-emerald-600 dark:text-emerald-400 bg-emerald-100/50 dark:bg-emerald-950/40 border-emerald-200/50 dark:border-emerald-900/30'
+                    }`}>
                       ${food.precio.toLocaleString('es-CL')}
                     </span>
                   </div>
@@ -361,47 +703,52 @@ export default function ComensalView({ locales, reseñas, onReportReview }) {
             </div>
 
             {/* Reviews Section */}
-            <div className="flex flex-col gap-3">
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Reseñas de la Comunidad</h4>
-              <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2.5">
+              <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Reseñas de Comensales</h4>
+              <div className="flex flex-col gap-2.5">
                 {reseñas
                   .filter(review => review.localId === selectedLocal.id)
                   .map(review => (
                     <div 
                       key={review.id} 
-                      className={`p-3.5 rounded-xl border transition-all ${
+                      className={`p-3 rounded-2xl border transition-all ${
                         review.reportado 
-                          ? 'bg-rose-950/15 border-rose-900/40 opacity-75' 
-                          : 'bg-slate-950 border-slate-850'
+                          ? 'bg-rose-50/50 dark:bg-rose-950/15 border-rose-200/50 dark:border-rose-900/40 opacity-75' 
+                          : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800'
                       }`}
                     >
-                      <div className="flex justify-between items-center mb-1.5">
-                        <span className="text-xs font-bold text-slate-300 font-mono">@{review.usuario}</span>
-                        <div className="flex text-amber-400 text-xs font-mono">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300 font-mono">@{review.usuario}</span>
+                        <div className="flex text-amber-500 text-xs font-mono select-none">
                           {'★'.repeat(review.calificacion)}
                           {'☆'.repeat(5 - review.calificacion)}
                         </div>
                       </div>
 
-                      <p className="text-xs text-slate-400 leading-relaxed font-medium">"{review.comentario}"</p>
+                      <p className="text-xs text-slate-600 dark:text-slate-400 font-medium leading-relaxed">"{review.comentario}"</p>
 
                       {review.reportado ? (
-                        <div className="mt-2.5 flex items-center space-x-1.5 bg-rose-950/30 border border-rose-900/50 p-2 rounded-lg">
-                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5 text-rose-400 shrink-0">
-                            <path fillRule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clipRule="evenodd" />
-                          </svg>
-                          <span className="text-[10px] text-rose-300 font-bold leading-none">Reseña reportada - En revisión</span>
+                        <div className="mt-2 flex items-center space-x-1.5 bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900/50 p-1.5 rounded-lg">
+                          <span className="text-[9px] text-rose-600 dark:text-rose-400 font-bold leading-none">⚠️ Reseña bajo revisión por Moderador</span>
                         </div>
                       ) : (
-                        <div className="mt-2.5 flex justify-end">
+                        <div className="mt-2 flex justify-end">
                           <button
-                            onClick={() => onReportReview(review.id)}
-                            className="flex items-center space-x-1 text-[10px] font-bold text-rose-400 hover:text-rose-300 bg-rose-950/20 hover:bg-rose-950/40 border border-rose-900/40 px-2 py-1 rounded-md transition-all"
+                            onClick={() => {
+                              if (isGuest) {
+                                alert("Debes estar registrado como Comensal para reportar trolls.");
+                              } else {
+                                onReportReview(review.id);
+                              }
+                            }}
+                            disabled={isGuest}
+                            className={`flex items-center space-x-1 text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded border transition-all ${
+                              isGuest 
+                                ? 'opacity-40 bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' 
+                                : 'text-rose-500 hover:text-rose-600 bg-rose-100/30 hover:bg-rose-100/50 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 border-rose-200 dark:border-rose-900/50'
+                            }`}
                           >
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-3 h-3">
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-5.705-1.115 48.552 48.552 0 0 1-6.49 1.487L3 15Z" />
-                            </svg>
-                            <span>Reportar Troll</span>
+                            <span>🚩 Reportar Troll</span>
                           </button>
                         </div>
                       )}
@@ -409,7 +756,7 @@ export default function ComensalView({ locales, reseñas, onReportReview }) {
                   ))}
 
                 {reseñas.filter(review => review.localId === selectedLocal.id).length === 0 && (
-                  <p className="text-xs text-slate-500 italic text-center py-2">No hay reseñas para este local aún.</p>
+                  <p className="text-xs text-slate-400 italic text-center py-2">Sin valoraciones para este local aún.</p>
                 )}
               </div>
             </div>
