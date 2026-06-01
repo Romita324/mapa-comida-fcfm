@@ -839,9 +839,14 @@ export default function ComensalView({
                                 alert("Debes estar registrado como Comensal para votar la utilidad de las reseñas.");
                                 return;
                               }
-                              if (votedReviews.includes(review.id)) return;
-                              onVoteHelpful(review.id);
-                              setVotedReviews(prev => [...prev, review.id]);
+                              const alreadyVoted = votedReviews.includes(review.id);
+                              if (alreadyVoted) {
+                                onVoteHelpful(review.id, false);
+                                setVotedReviews(prev => prev.filter(id => id !== review.id));
+                              } else {
+                                onVoteHelpful(review.id, true);
+                                setVotedReviews(prev => [...prev, review.id]);
+                              }
                             }}
                             disabled={isGuest}
                             className={`flex items-center space-x-1.5 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-xl border transition-all ${

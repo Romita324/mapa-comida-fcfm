@@ -268,9 +268,9 @@ export default function App() {
     addToast("Reseña agregada en vivo", "success");
   };
 
-  const handleVoteHelpful = (reviewId) => {
+  const handleVoteHelpful = (reviewId, isIncrement = true) => {
     setReseñasList(prev =>
-      prev.map(r => r.id === reviewId ? { ...r, votosUtilidad: (r.votosUtilidad || 0) + 1 } : r)
+      prev.map(r => r.id === reviewId ? { ...r, votosUtilidad: Math.max(0, (r.votosUtilidad || 0) + (isIncrement ? 1 : -1)) } : r)
     );
   };
 
