@@ -11,7 +11,8 @@ export default function Navbar({
   notifications,
   setNotifications,
   onOpenMonthlySummary,
-  onOpenProfile
+  onOpenProfile,
+  onLogout
 }) {
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
   useEffect(() => {
@@ -136,10 +137,19 @@ export default function Navbar({
             {/* Profile Button (Mobile) */}
             <button 
               onClick={onOpenProfile}
-              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs shrink-0 font-bold"
+              className="p-2 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 hover:bg-slate-200 dark:hover:bg-slate-805 text-slate-500 dark:text-slate-400 text-xs shrink-0 font-bold"
               title="Mi Perfil"
             >
               👤
+            </button>
+
+            {/* Logout Button (Mobile) */}
+            <button 
+              onClick={onLogout}
+              className="p-2 rounded-xl bg-rose-50 dark:bg-rose-955/35 border border-rose-200 dark:border-rose-900/60 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-500 text-xs shrink-0 font-bold"
+              title="Cerrar Sesión"
+            >
+              🚪
             </button>
 
             {/* Notification Bell (Mobile) */}
@@ -311,6 +321,15 @@ export default function Navbar({
               title="Mi Perfil"
             >
               👤
+            </button>
+
+            {/* Logout Button (Desktop) */}
+            <button 
+              onClick={onLogout}
+              className="p-2.5 rounded-xl border border-rose-200 dark:border-rose-900 bg-rose-50 dark:bg-rose-955/35 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-500 transition-colors relative shrink-0 font-bold"
+              title="Cerrar Sesión"
+            >
+              🚪
             </button>
           </div>
 

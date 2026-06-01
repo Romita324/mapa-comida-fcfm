@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import ComensalView from './components/ComensalView';
 import VendedorView from './components/VendedorView';
-import AdminView from './components/AdminView';
+import AdminDashboard from './components/AdminDashboard';
 import ProfileDrawer from './components/ProfileDrawer';
+import ProfileView from './components/ProfileView';
 
 // Import initial database mocks
 import { 
@@ -16,6 +17,7 @@ import {
 export default function App() {
   const [activeView, setActiveView] = useState('comensal'); // 'comensal', 'vendedor', 'admin', 'invitado'
   const [registeredUser, setRegisteredUser] = useState({ username: 'comensal_demo', role: 'comensal' });
+  const [showOnboarding, setShowOnboarding] = useState(true);
 
   const handleActiveViewChange = (view) => {
     setActiveView(view);
@@ -39,6 +41,7 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'system');
   const [deviceMode, setDeviceMode] = useState('browser'); // 'browser' | 'mobile'
   const [favoritos, setFavoritos] = useState([2]); // Casino Central is favorited by default
+  const [filterFavorites, setFilterFavorites] = useState(false);
   const [solicitudesVendedor, setSolicitudesVendedor] = useState([]);
   const [solicitudesModerador, setSolicitudesModerador] = useState([]);
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
@@ -173,7 +176,7 @@ export default function App() {
   };
 
   // HANDLER: Admin resolves security reviews
-  const handleResolveReport = (reportId, action, reviewId, username) => {
+  const handleResolveReport = (reportId, action, reviewId, username, reason = '') => {
     const timestamp = new Date().toLocaleDateString('es-CL') + ' ' + new Date().toLocaleTimeString('es-CL');
 
     if (action === 'banear') {
@@ -184,7 +187,7 @@ export default function App() {
 
       const newLog = {
         id: Date.now(),
-        accion: `Admin eliminó reseña ID ${reviewId} y bloqueó al usuario '${username || 'desconocido'}' por trolling.`,
+        accion: `Admin eliminó reseña ID ${reviewId} y bloqueó al usuario '${username || 'desconocido'}' por trolling. Motivo: ${reason || 'Sin motivo especificado'}`,
         fecha: timestamp
       };
       setAuditLogs(prev => [newLog, ...prev]);
@@ -227,12 +230,40 @@ export default function App() {
       categoria: solicitudData.categoria,
       aceptaJunaeb: solicitudData.aceptaJunaeb,
       menu: solicitudData.menu.map(item => ({ ...item, agotado: false })),
-      coordenadas: [-33.4581 + (Math.random() - 0.5) * 0.008, -70.6642 + (Math.random() - 0.5) * 0.008], // Random near FCFM
+      coordenadas: solicitudData.coordenadas || [-33.4581 + (Math.random() - 0.5) * 0.008, -70.6642 + (Math.random() - 0.5) * 0.008],
       estado: 'Pendiente',
       vendedorUsername: registeredUser ? registeredUser.username : 'vendedor_demo'
     };
     setSolicitudesVendedor(prev => [...prev, newSolicitud]);
     addToast("Solicitud de local enviada al Administrador", "success");
+  };
+
+  const handleAddReview = (localId, rating, comment) => {
+    const newReview = {
+      id: Date.now(),
+      localId,
+      usuario: registeredUser ? registeredUser.username : 'Invitado',
+      calificacion: rating,
+      comentario: comment,
+      votosUtilidad: 0,
+      fecha: "Ahora",
+      reportado: false
+    };
+    setReseñasList(prev => [newReview, ...prev]);
+    addToast("Reseña agregada en vivo", "success");
+  };
+
+  const handleUpdateLocalTags = (localId, updatedTags) => {
+    setLocalesList(prev => 
+      prev.map(l => l.id === localId ? { ...l, tags: updatedTags } : l)
+    );
+    addToast("Etiquetas del local actualizadas", "success");
+  };
+
+  const handleLogout = () => {
+    setRegisteredUser(null);
+    setActiveView('comensal');
+    setShowOnboarding(true);
   };
 
   // HANDLER: Vendedor updates local menu (e.g. toggles item out-of-stock)
@@ -367,7 +398,14 @@ export default function App() {
         notifications={notifications}
         setNotifications={setNotifications}
         onOpenMonthlySummary={() => setIsSummaryOpen(true)}
-        onOpenProfile={() => setIsProfileOpen(true)}
+        onOpenProfile={() => {
+          if (registeredUser && registeredUser.role === 'comensal') {
+            setActiveView('perfil');
+          } else {
+            setIsProfileOpen(true);
+          }
+        }}
+        onLogout={handleLogout}
       />
 
       <main className="flex-1 w-full flex flex-col min-h-0 relative">
@@ -382,6 +420,9 @@ export default function App() {
             isGuest={false}
             theme={theme}
             deviceMode={deviceMode}
+            filterFavorites={filterFavorites}
+            setFilterFavorites={setFilterFavorites}
+            onAddReview={handleAddReview}
           />
         )}
 
@@ -396,6 +437,26 @@ export default function App() {
             isGuest={true}
             theme={theme}
             deviceMode={deviceMode}
+            filterFavorites={false}
+            setFilterFavorites={() => {}}
+            onAddReview={() => {}}
+          />
+        )}
+
+        {/* PROFILE VIEW */}
+        {activeView === 'perfil' && (
+          <ProfileView 
+            registeredUser={registeredUser}
+            favoritos={favoritos}
+            locales={localesList}
+            onToggleFavorite={handleToggleFavorite}
+            onGoBack={() => setActiveView('comensal')}
+            solicitudesModerador={solicitudesModerador}
+            onPostularModerador={handlePostularModerador}
+            onFilterFavoritesOnMap={() => {
+              setFilterFavorites(true);
+              setActiveView('comensal');
+            }}
           />
         )}
         
@@ -406,12 +467,13 @@ export default function App() {
             onUpdateLocalStatus={handleUpdateLocalStatus}
             registeredUser={registeredUser}
             onUpdateLocalMenu={handleUpdateLocalMenu}
+            onUpdateLocalTags={handleUpdateLocalTags}
           />
         )}
         
-        {/* ADMIN VIEW */}
+        {/* ADMIN DASHBOARD */}
         {activeView === 'admin' && (
-          <AdminView 
+          <AdminDashboard 
             locales={localesList} 
             reseñas={reseñasList} 
             reportesSeguridad={reportesList} 
@@ -454,6 +516,97 @@ export default function App() {
       />
     </div>
   );
+
+  if (showOnboarding) {
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-tr from-slate-900 via-slate-950 to-emerald-950 text-slate-100 flex items-center justify-center p-4 antialiased select-none font-sans transition-colors duration-200">
+        <div className="max-w-md w-full bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 shadow-2xl flex flex-col gap-6 text-center animate-scale-up">
+          
+          <div className="flex flex-col items-center gap-3">
+            <div className="p-4 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-2xl text-slate-950 shadow-lg shadow-emerald-500/25 transform transition-transform hover:rotate-6">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-10 h-10">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-3xl font-extrabold bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent tracking-tight">
+                Beauchef Eats
+              </h1>
+              <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mt-1.5 font-mono">
+                Mapa de Comida FCFM • Demo MVP
+              </p>
+            </div>
+          </div>
+
+          <p className="text-xs text-slate-400 leading-relaxed px-4">
+            Bienvenido al portal centralizado de alimentación para la comunidad de Beauchef. Selecciona tu perfil de acceso para simular las funciones de la demo de 7 minutos.
+          </p>
+
+          <div className="flex flex-col gap-3.5 mt-2">
+            <button
+              onClick={() => {
+                setRegisteredUser({ username: 'comensal_demo', role: 'comensal' });
+                setActiveView('comensal');
+                setShowOnboarding(false);
+              }}
+              className="group p-4 bg-slate-950/60 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500/50 rounded-2xl flex items-center justify-between text-left transition-all duration-300 active:scale-[0.98] shadow-sm"
+            >
+              <div className="flex items-center space-x-3.5">
+                <span className="text-2xl p-2 bg-emerald-950/40 rounded-xl group-hover:scale-110 transition-transform">🍔</span>
+                <div>
+                  <h4 className="text-xs font-black text-slate-200">Iniciar Sesión Comensal</h4>
+                  <p className="text-[9px] text-slate-505 leading-none mt-1">Busca comida, marca favoritos y escribe reseñas.</p>
+                </div>
+              </div>
+              <span className="text-slate-600 group-hover:text-emerald-400 transition-colors">➔</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setRegisteredUser({ username: 'vendedor_demo', role: 'vendedor' });
+                setActiveView('vendedor');
+                setShowOnboarding(false);
+              }}
+              className="group p-4 bg-slate-950/60 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500/50 rounded-2xl flex items-center justify-between text-left transition-all duration-300 active:scale-[0.98] shadow-sm"
+            >
+              <div className="flex items-center space-x-3.5">
+                <span className="text-2xl p-2 bg-amber-950/40 rounded-xl group-hover:scale-110 transition-transform">🏪</span>
+                <div>
+                  <h4 className="text-xs font-black text-slate-200">Iniciar Sesión Vendedor</h4>
+                  <p className="text-[9px] text-slate-505 leading-none mt-1">Gestiona tu local, cambia el stock y abre tu menú.</p>
+                </div>
+              </div>
+              <span className="text-slate-600 group-hover:text-emerald-400 transition-colors">➔</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setRegisteredUser(null);
+                setActiveView('invitado');
+                setShowOnboarding(false);
+              }}
+              className="group p-4 bg-slate-950/40 hover:bg-slate-900/50 border border-slate-800 hover:border-slate-700/50 rounded-2xl flex items-center justify-between text-left transition-all duration-300 active:scale-[0.98] shadow-sm"
+            >
+              <div className="flex items-center space-x-3.5">
+                <span className="text-2xl p-2 bg-slate-900/40 rounded-xl group-hover:scale-110 transition-transform">👁️</span>
+                <div>
+                  <h4 className="text-xs font-black text-slate-300">Entrar sin iniciar sesión (Invitado)</h4>
+                  <p className="text-[9px] text-slate-505 leading-none mt-1">Explora locales y lee reseñas de la comunidad.</p>
+                </div>
+              </div>
+              <span className="text-slate-600 group-hover:text-emerald-400 transition-colors">➔</span>
+            </button>
+          </div>
+
+          <div className="text-[8px] text-slate-600 font-mono mt-4">
+            DCC FCFM • Evaluación de Proyectos
+          </div>
+
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-900 flex items-center justify-center font-sans antialiased transition-colors duration-200">
