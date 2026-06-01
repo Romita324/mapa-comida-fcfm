@@ -591,7 +591,7 @@ export default function VendedorView({
                   className={`flex-1 py-2 rounded-xl text-[10px] font-black shadow-md transition-all active:scale-[0.98] ${
                     confirmItem.agotado 
                       ? 'bg-emerald-500 hover:bg-emerald-600 text-slate-950'
-                      : 'bg-rose-50 hover:bg-rose-600 text-white'
+                      : 'bg-rose-500 hover:bg-rose-600 text-white'
                   }`}
                 >
                   Confirmar
