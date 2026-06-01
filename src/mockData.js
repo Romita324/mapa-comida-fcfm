@@ -12,6 +12,7 @@ export const locales = [
     aceptaJunaeb: true,
     estadoServicio: "Abierto",
     categoria: "Comida Rápida",
+    tags: ["Casero", "Bajo en Sodio"],
     menu: [
       { item: "Completo Italiano", precio: 2500 },
       { item: "As de Vacuno", precio: 3200 }
@@ -25,6 +26,7 @@ export const locales = [
     aceptaJunaeb: true,
     estadoServicio: "Abierto",
     categoria: "Almuerzos",
+    tags: ["Saludable", "Vegetariana"],
     menu: [
       { item: "Menú del Día (Fondo + Ensalada)", precio: 3500 },
       { item: "Opción Vegetariana", precio: 3500 }
@@ -38,6 +40,7 @@ export const locales = [
     aceptaJunaeb: false,
     estadoServicio: "Cerrado",
     categoria: "Comida Rápida",
+    tags: ["Vegetariana"],
     menu: [
       { item: "Pizza Individual Pepperoni", precio: 4500 },
       { item: "Promo 2x1 Martes", precio: 8990 }
@@ -51,6 +54,7 @@ export const locales = [
     aceptaJunaeb: true,
     estadoServicio: "Sin Stock",
     categoria: "Vegana",
+    tags: ["Vegana", "Sin Gluten", "Apto para Celíacos"],
     menu: [
       { item: "Bowl de Falafel", precio: 4200 },
       { item: "Hamburgesa de Lentejas", precio: 3800 }

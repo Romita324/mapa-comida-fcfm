@@ -365,6 +365,15 @@ export default function ComensalView({
                     <div>
                       <h3 className="font-extrabold text-slate-800 dark:text-slate-100 text-xs leading-snug">{local.nombre}</h3>
                       <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{local.categoria}</p>
+                      {local.tags && local.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {local.tags.map(tag => (
+                            <span key={tag} className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-250 dark:border-emerald-900/40 text-[8px] font-black uppercase">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold tracking-wide shrink-0 ${
                       local.estadoServicio === 'Abierto'
@@ -734,6 +743,16 @@ export default function ComensalView({
                 <span>•</span>
                 <span className="font-mono">{selectedLocal.distanciaKm} km de FCFM</span>
               </p>
+
+              {selectedLocal.tags && selectedLocal.tags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mt-2">
+                  {selectedLocal.tags.map(tag => (
+                    <span key={tag} className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900/40 text-[8.5px] font-extrabold uppercase">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               {/* Junaeb Callout */}
               {selectedLocal.aceptaJunaeb ? (
