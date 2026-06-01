@@ -17,6 +17,7 @@ export default function ComensalView({
   locales, 
   reseñas, 
   onReportReview,
+  onVoteHelpful,
   favoritos,
   onToggleFavorite,
   isGuest,
@@ -37,6 +38,7 @@ export default function ComensalView({
   const [mapCenter, setMapCenter] = useState([-33.4581, -70.6642]); // FCFM center
   const [mobileTab, setMobileTab] = useState('mapa'); // 'mapa' | 'lista'
   const [reportConfirmData, setReportConfirmData] = useState(null);
+  const [votedReviews, setVotedReviews] = useState([]);
 
   // Viewport resize tracking to support desktop browser resizing alongside chassis simulated mode
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
@@ -169,7 +171,7 @@ export default function ComensalView({
             <div>
               <h4 className="text-xs font-bold text-amber-800 dark:text-amber-400">Perfil de Invitado</h4>
               <p className="text-[10px] text-amber-700/80 dark:text-amber-500/80 mt-0.5 leading-normal">
-                Visualizas el mapa en modo de solo lectura. Regístrate como comensal para agregar favoritos, enviar reportes anti-troll y postular como moderador.
+                Visualizas el mapa en modo de solo lectura. Regístrate como comensal para agregar favoritos, votar utilidad de reseñas, enviar reportes anti-troll y postular como moderador.
               </p>
             </div>
           </div>
@@ -830,7 +832,32 @@ export default function ComensalView({
                           <span className="text-[9px] text-rose-600 dark:text-rose-400 font-bold leading-none">⚠️ Reseña bajo revisión por Moderador</span>
                         </div>
                       ) : (
-                        <div className="mt-2 flex justify-end">
+                        <div className="mt-2.5 flex justify-between items-center gap-2">
+                          <button
+                            onClick={() => {
+                              if (isGuest) {
+                                alert("Debes estar registrado como Comensal para votar la utilidad de las reseñas.");
+                                return;
+                              }
+                              if (votedReviews.includes(review.id)) return;
+                              onVoteHelpful(review.id);
+                              setVotedReviews(prev => [...prev, review.id]);
+                            }}
+                            disabled={isGuest}
+                            className={`flex items-center space-x-1.5 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-xl border transition-all ${
+                              isGuest 
+                                ? 'opacity-40 bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+                                : votedReviews.includes(review.id)
+                                ? 'bg-emerald-100 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-900 text-emerald-800 dark:text-emerald-400 shadow-inner'
+                                : 'text-slate-500 bg-slate-105 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 border-slate-200 dark:border-slate-800 hover:text-slate-700 dark:hover:text-slate-300'
+                            }`}
+                          >
+                            <span>{votedReviews.includes(review.id) ? '👍 ¡Útil!' : '👍 Me sirvió'}</span>
+                            <span className="ml-1 px-1.5 py-0.5 rounded bg-white/60 dark:bg-black/20 text-[8.5px] font-mono font-bold shadow-xs">
+                              {review.votosUtilidad || 0}
+                            </span>
+                          </button>
+
                           <button
                             onClick={() => {
                               if (isGuest) {
@@ -840,7 +867,7 @@ export default function ComensalView({
                               }
                             }}
                             disabled={isGuest}
-                            className={`flex items-center space-x-1 text-[9px] font-black uppercase tracking-wider px-2 py-1 rounded border transition-all ${
+                            className={`flex items-center space-x-1.5 text-[9px] font-black uppercase tracking-wider px-2.5 py-1 rounded-xl border transition-all ${
                               isGuest 
                                 ? 'opacity-40 bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed' 
                                 : 'text-rose-500 hover:text-rose-600 bg-rose-100/30 hover:bg-rose-100/50 dark:bg-rose-950/20 dark:hover:bg-rose-950/40 border-rose-200 dark:border-rose-900/50'

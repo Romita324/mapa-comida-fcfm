@@ -268,6 +268,12 @@ export default function App() {
     addToast("Reseña agregada en vivo", "success");
   };
 
+  const handleVoteHelpful = (reviewId) => {
+    setReseñasList(prev =>
+      prev.map(r => r.id === reviewId ? { ...r, votosUtilidad: (r.votosUtilidad || 0) + 1 } : r)
+    );
+  };
+
   const handleUpdateLocalTags = (localId, updatedTags) => {
     setLocalesList(prev => 
       prev.map(l => l.id === localId ? { ...l, tags: updatedTags } : l)
@@ -441,6 +447,7 @@ export default function App() {
             locales={localesList} 
             reseñas={reseñasList} 
             onReportReview={handleReportReview}
+            onVoteHelpful={handleVoteHelpful}
             favoritos={favoritos}
             onToggleFavorite={handleToggleFavorite}
             isGuest={false}
@@ -458,6 +465,7 @@ export default function App() {
             locales={localesList} 
             reseñas={reseñasList} 
             onReportReview={handleReportReview}
+            onVoteHelpful={handleVoteHelpful}
             favoritos={[]}
             onToggleFavorite={handleToggleFavorite}
             isGuest={true}
