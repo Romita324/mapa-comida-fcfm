@@ -21,14 +21,19 @@ export default function ComensalView({
   onToggleFavorite,
   isGuest,
   theme,
-  deviceMode
+  deviceMode,
+  onAddReview,
+  filterFavorites,
+  setFilterFavorites
 }) {
   const [selectedLocal, setSelectedLocal] = useState(null);
   const [isFloatingFiltersOpen, setIsFloatingFiltersOpen] = useState(false);
   const [filterJunaeb, setFilterJunaeb] = useState(false);
   const [filterCategory, setFilterCategory] = useState('All');
   const [maxDistance, setMaxDistance] = useState(3.0); // Capped at strict 3.0 km
-  const [filterFavorites, setFilterFavorites] = useState(false);
+  const [filterStatus, setFilterStatus] = useState('All'); // 'All' | 'Abierto' | 'Colación' | 'Cerrado'
+  const [newRating, setNewRating] = useState(5);
+  const [newComment, setNewComment] = useState('');
   const [mapCenter, setMapCenter] = useState([-33.4581, -70.6642]); // FCFM center
   const [mobileTab, setMobileTab] = useState('mapa'); // 'mapa' | 'lista'
 
@@ -54,6 +59,8 @@ export default function ComensalView({
     if (filterCategory !== 'All' && local.categoria !== filterCategory) return false;
     // 4. Favorites filter
     if (filterFavorites && !isGuest && !favoritos.includes(local.id)) return false;
+    // 5. Status filter
+    if (filterStatus !== 'All' && local.estadoServicio !== filterStatus) return false;
     return true;
   });
 
@@ -172,7 +179,7 @@ export default function ComensalView({
           <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-3">
             <h2 className="text-sm font-extrabold text-slate-800 dark:text-slate-100">Filtros de Búsqueda</h2>
             <button 
-              onClick={() => { setFilterJunaeb(false); setFilterCategory('All'); setMaxDistance(3.0); setFilterFavorites(false); }}
+              onClick={() => { setFilterJunaeb(false); setFilterCategory('All'); setMaxDistance(3.0); setFilterFavorites(false); setFilterStatus('All'); }}
               className="text-[10px] text-emerald-500 hover:text-emerald-400 font-bold transition-colors"
             >
               Restablecer
@@ -218,6 +225,32 @@ export default function ComensalView({
               <span>0.1 km</span>
               <span>1.5 km</span>
               <span>3.0 km (Geofencing)</span>
+            </div>
+          </div>
+
+          {/* Status Filter */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Estado de Servicio</label>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { value: 'All', label: 'Todos' },
+                { value: 'Abierto', label: '🟢 Abiertos' },
+                { value: 'Colación', label: '⏰ Colación' },
+                { value: 'Cerrado', label: '🔴 Cerrados' }
+              ].map(statusOpt => (
+                <button
+                  key={statusOpt.value}
+                  type="button"
+                  onClick={() => setFilterStatus(statusOpt.value)}
+                  className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                    filterStatus === statusOpt.value
+                      ? 'bg-slate-900 dark:bg-slate-100 border-slate-900 dark:border-slate-100 text-white dark:text-slate-950 font-black'
+                      : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                  }`}
+                >
+                  {statusOpt.label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -304,9 +337,28 @@ export default function ComensalView({
                       : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                   }`}
                 >
-                  {/* Favorite mini heart */}
-                  {isFav && (
-                    <span className="absolute top-3.5 right-3.5 text-xs">❤️</span>
+                  {/* Favorite direct heart toggle button */}
+                  {!isGuest && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleFavorite(local.id);
+                      }}
+                      className="absolute top-3.5 right-3.5 p-1 rounded-full border border-slate-200 dark:border-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-500 transition-colors z-10"
+                      title={isFav ? "Quitar de favoritos" : "Agregar a favoritos"}
+                    >
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        fill={isFav ? "currentColor" : "none"} 
+                        viewBox="0 0 24 24" 
+                        strokeWidth="2.5" 
+                        stroke="currentColor" 
+                        className="w-3.5 h-3.5"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                      </svg>
+                    </button>
                   )}
 
                   <div className="flex justify-between items-start pr-6">
@@ -395,7 +447,7 @@ export default function ComensalView({
                 </div>
                 <div className="flex items-center space-x-3">
                   <button 
-                    onClick={() => { setFilterJunaeb(false); setFilterCategory('All'); setMaxDistance(3.0); setFilterFavorites(false); }}
+                    onClick={() => { setFilterJunaeb(false); setFilterCategory('All'); setMaxDistance(3.0); setFilterFavorites(false); setFilterStatus('All'); }}
                     className="text-[11px] text-emerald-500 hover:text-emerald-400 font-bold transition-colors"
                   >
                     Restablecer
@@ -448,6 +500,32 @@ export default function ComensalView({
                   <span>0.1 km</span>
                   <span>1.5 km</span>
                   <span>3.0 km (Geofencing)</span>
+                </div>
+              </div>
+
+              {/* Status Filter (Mobile) */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Estado de Servicio</label>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    { value: 'All', label: 'Todos' },
+                    { value: 'Abierto', label: '🟢 Abiertos' },
+                    { value: 'Colación', label: '⏰ Colación' },
+                    { value: 'Cerrado', label: '🔴 Cerrados' }
+                  ].map(statusOpt => (
+                    <button
+                      key={statusOpt.value}
+                      type="button"
+                      onClick={() => setFilterStatus(statusOpt.value)}
+                      className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                        filterStatus === statusOpt.value
+                          ? 'bg-slate-900 dark:bg-slate-100 border-slate-900 dark:border-slate-100 text-white dark:text-slate-950 font-black'
+                          : 'bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                      }`}
+                    >
+                      {statusOpt.label}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -759,6 +837,58 @@ export default function ComensalView({
                   <p className="text-xs text-slate-400 italic text-center py-2">Sin valoraciones para este local aún.</p>
                 )}
               </div>
+
+              {/* Review Submission Form */}
+              {!isGuest ? (
+                <form 
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!newComment.trim()) return;
+                    onAddReview(selectedLocal.id, newRating, newComment.trim());
+                    setNewComment('');
+                    setNewRating(5);
+                  }} 
+                  className="bg-slate-50 dark:bg-slate-950 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 flex flex-col gap-2.5 mt-2"
+                >
+                  <h5 className="text-[9px] font-extrabold uppercase text-slate-400 tracking-wider">Escribir una Reseña</h5>
+                  
+                  <div className="flex items-center gap-2">
+                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Calificación:</span>
+                    <div className="flex gap-1 text-amber-500">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setNewRating(star)}
+                          className="text-base transition-transform hover:scale-110 active:scale-95 cursor-pointer"
+                        >
+                          {star <= newRating ? '★' : '☆'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <textarea
+                    rows={2}
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Comparte tu experiencia con este local..."
+                    className="w-full p-2 text-xs rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-850 dark:text-slate-250 focus:outline-none focus:border-emerald-500 resize-none font-sans"
+                  />
+
+                  <button
+                    type="submit"
+                    disabled={!newComment.trim()}
+                    className="self-end px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:hover:bg-emerald-500 text-slate-950 font-black rounded-lg text-[9px] uppercase tracking-wider shadow-sm transition-all active:scale-[0.98]"
+                  >
+                    Publicar Reseña
+                  </button>
+                </form>
+              ) : (
+                <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 text-center mt-2">
+                  <p className="text-[10px] text-slate-400 font-bold">Inicia sesión como Comensal para escribir una reseña.</p>
+                </div>
+              )}
             </div>
           </div>
         )}
