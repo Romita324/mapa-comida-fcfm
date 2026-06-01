@@ -1,15 +1,18 @@
 import { useState } from 'react';
 
 export default function VendedorView({ 
-  locales, 
+  locales = [], 
   onUpdateLocalStatus,
   registeredUser,
   onUpdateLocalMenu,
-  onUpdateLocalTags
+  onUpdateLocalTags,
+  solicitudesVendedor = [],
+  onRegisterNewLocal,
+  onToggleLocalJunaeb
 }) {
   const isDemo = !registeredUser || registeredUser.username === 'vendedor_demo';
   
-  // Filter locales list to show only the logged in user's local, unless they are using the demo account
+  // Filter locales list to show only the logged in user's local
   const myLocales = isDemo 
     ? locales 
     : locales.filter(l => l.vendedorUsername === registeredUser.username);
@@ -19,6 +22,30 @@ export default function VendedorView({
   const [newProductName, setNewProductName] = useState('');
   const [newProductPrice, setNewProductPrice] = useState('');
   const [confirmItem, setConfirmItem] = useState(null);
+
+  // Registration Modal States
+  const [isRegModalOpen, setIsRegModalOpen] = useState(false);
+  const [regLocalNombre, setRegLocalNombre] = useState('');
+  const [regLocalCategoria, setRegLocalCategoria] = useState('Casino');
+  const [regLocalJunaeb, setRegLocalJunaeb] = useState(true);
+  const [regLocalPreset, setRegLocalPreset] = useState('Patio Central');
+  const [regLocalMenu, setRegLocalMenu] = useState([]);
+  const [tempItemName, setTempItemName] = useState('');
+  const [tempItemPrice, setTempItemPrice] = useState('');
+
+  // Location Presets
+  const locationPresets = {
+    'Patio Central': [-33.4581, -70.6642],
+    'Beauchef 851': [-33.4568, -70.6636],
+    'Entrada Blanco Encalada': [-33.4572, -70.6645],
+    'Edificio Física': [-33.4588, -70.6648],
+    'Edificio Geología': [-33.4576, -70.6651],
+  };
+
+  // Check if they have a pending request
+  const pendingSolicitud = solicitudesVendedor.find(
+    s => s.vendedorUsername === registeredUser?.username && s.estado === 'Pendiente'
+  );
 
   // Ensure we adapt dynamically when myLocales changes
   const activeLocal = myLocales.find(l => l.id === parseInt(selectedOption)) || myLocales[0];
@@ -53,6 +80,38 @@ export default function VendedorView({
     setConfirmItem(null);
   };
 
+  const handleAddTempItem = (e) => {
+    e.preventDefault();
+    if (!tempItemName.trim() || !tempItemPrice) return;
+    const priceVal = parseInt(tempItemPrice);
+    if (isNaN(priceVal) || priceVal <= 0) return;
+    
+    setRegLocalMenu(prev => [...prev, { item: tempItemName.trim(), precio: priceVal }]);
+    setTempItemName('');
+    setTempItemPrice('');
+  };
+
+  const handleRegisterSubmit = (e) => {
+    e.preventDefault();
+    if (!regLocalNombre.trim()) return;
+
+    onRegisterNewLocal({
+      nombre: regLocalNombre.trim(),
+      categoria: regLocalCategoria,
+      aceptaJunaeb: regLocalJunaeb,
+      menu: regLocalMenu,
+      coordenadas: locationPresets[regLocalPreset]
+    });
+
+    // Reset Form
+    setRegLocalNombre('');
+    setRegLocalCategoria('Casino');
+    setRegLocalJunaeb(true);
+    setRegLocalPreset('Patio Central');
+    setRegLocalMenu([]);
+    setIsRegModalOpen(false);
+  };
+
   const states = [
     { name: 'Abierto', label: '🟢 Abierto', active: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400' },
     { name: 'Colación', label: '⏰ Colación', active: 'border-orange-500 bg-orange-50 dark:bg-orange-950/20 text-orange-600 dark:text-orange-400' },
@@ -60,6 +119,7 @@ export default function VendedorView({
     { name: 'Cerrado', label: '🔴 Cerrado', active: 'border-rose-500 bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-455' }
   ];
 
+  // EMPTY STATE FLOW
   if (myLocales.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-6 flex flex-col items-center justify-start h-full overflow-y-auto select-none scrollbar-thin">
@@ -69,20 +129,163 @@ export default function VendedorView({
             Portal de Locatarios
           </h2>
           <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 leading-relaxed">
-            Sincronización de bajo consumo de datos y ancho de banda. Administra la disponibilidad y stock en caliente de tu local comercial.
+            Sincronización de bajo consumo de datos. Administra la disponibilidad y stock de tu local.
           </p>
         </div>
 
-        {/* Empty State */}
-        <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-xl transition-colors">
-          <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 text-center transition-colors">
-            <span className="text-3xl block mb-2">🏪</span>
-            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300">Sin locales vinculados</h4>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2 leading-normal">
-              No tienes locales comerciales aprobados bajo la cuenta <span className="font-extrabold text-emerald-500">@{registeredUser?.username}</span>. Abre tu <span className="font-extrabold text-emerald-500">Perfil de Usuario</span> (icono 👤 en la cabecera) para registrar un nuevo local o revisar solicitudes en proceso.
-            </p>
+        {/* Empty State Screen */}
+        <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xl transition-colors">
+          <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 text-center transition-colors flex flex-col gap-4">
+            <span className="text-4xl block">🏪</span>
+            <h4 className="text-xs font-bold text-slate-700 dark:text-slate-350">Usted aún no tiene ningún local registrado en el sistema</h4>
+            
+            {pendingSolicitud ? (
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/25 border border-amber-250 dark:border-amber-900 rounded-xl text-left">
+                <span className="text-[9px] font-black uppercase text-amber-550 block mb-1">Solicitud en Proceso</span>
+                <p className="text-[9px] text-slate-500 dark:text-slate-400 leading-normal">
+                  Ya has enviado una solicitud para registrar el local <strong className="text-slate-700 dark:text-slate-200">"{pendingSolicitud.nombre}"</strong>. Actualmente se encuentra bajo revisión por el Administrador.
+                </p>
+              </div>
+            ) : (
+              <>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed px-2">
+                  Para comenzar a ofrecer tus productos a la comunidad Beauchefeana, solicita la publicación de tu local comercial en la plataforma.
+                </p>
+                <button
+                  onClick={() => setIsRegModalOpen(true)}
+                  className="w-full py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black rounded-xl text-xs shadow-md transition-all active:scale-[0.98] hover:opacity-95 cursor-pointer"
+                >
+                  Publicar mi Local
+                </button>
+              </>
+            )}
           </div>
         </div>
+
+        {/* Registration Modal */}
+        {isRegModalOpen && (
+          <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[1000] flex items-center justify-center p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl animate-scale-up max-h-[90vh] overflow-y-auto scrollbar-thin">
+              <h3 className="text-sm font-black text-slate-800 dark:text-slate-100 uppercase tracking-wider mb-4">Postulación de Local</h3>
+              
+              <form onSubmit={handleRegisterSubmit} className="flex flex-col gap-4">
+                <div>
+                  <label className="text-[8px] text-slate-400 dark:text-slate-550 uppercase tracking-widest font-bold block mb-1">Nombre del Local</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ej: Jugos Beauchef"
+                    value={regLocalNombre}
+                    onChange={(e) => setRegLocalNombre(e.target.value)}
+                    className="w-full text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[8px] text-slate-400 dark:text-slate-550 uppercase tracking-widest font-bold block mb-1">Categoría</label>
+                    <select
+                      value={regLocalCategoria}
+                      onChange={(e) => setRegLocalCategoria(e.target.value)}
+                      className="w-full text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-emerald-500"
+                    >
+                      <option value="Casino">Casino</option>
+                      <option value="Cafetería">Cafetería</option>
+                      <option value="Comida Rápida">Comida Rápida</option>
+                      <option value="Casero">Casero</option>
+                      <option value="Dulces">Dulces</option>
+                      <option value="Saludable">Saludable</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="text-[8px] text-slate-400 dark:text-slate-550 uppercase tracking-widest font-bold block mb-1">Ubicación (Presets)</label>
+                    <select
+                      value={regLocalPreset}
+                      onChange={(e) => setRegLocalPreset(e.target.value)}
+                      className="w-full text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-emerald-500"
+                    >
+                      {Object.keys(locationPresets).map(preset => (
+                        <option key={preset} value={preset}>{preset}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl">
+                  <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider">Acepta JUNAEB:</span>
+                  <input
+                    type="checkbox"
+                    checked={regLocalJunaeb}
+                    onChange={(e) => setRegLocalJunaeb(e.target.checked)}
+                    className="w-4 h-4 text-emerald-500 focus:ring-emerald-500 border-slate-300 rounded"
+                  />
+                </div>
+
+                {/* Add initial products */}
+                <div className="border-t border-slate-150 dark:border-slate-850 pt-3">
+                  <span className="text-[8px] text-slate-400 dark:text-slate-550 uppercase tracking-widest font-bold block mb-2">Menú Inicial ({regLocalMenu.length} items)</span>
+                  
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      placeholder="Producto"
+                      value={tempItemName}
+                      onChange={(e) => setTempItemName(e.target.value)}
+                      className="flex-1 text-[11px] p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Precio"
+                      value={tempItemPrice}
+                      onChange={(e) => setTempItemPrice(e.target.value)}
+                      className="w-16 text-[11px] p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddTempItem}
+                      className="px-3 bg-slate-850 text-white rounded-lg text-xs font-bold"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  {/* Temp menu list */}
+                  {regLocalMenu.length > 0 && (
+                    <div className="flex flex-col gap-1 max-h-24 overflow-y-auto p-1.5 bg-slate-50 dark:bg-slate-950 border border-slate-205 rounded-xl text-[10px]">
+                      {regLocalMenu.map((item, idx) => (
+                        <div key={idx} className="flex justify-between font-mono">
+                          <span>{item.item}</span>
+                          <span>${item.precio}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-3 border-t border-slate-200 dark:border-slate-800 pt-4 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRegLocalNombre('');
+                      setRegLocalMenu([]);
+                      setIsRegModalOpen(false);
+                    }}
+                    className="flex-1 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-350 rounded-xl text-[10px] font-bold transition-all"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black rounded-xl text-[10px] uppercase tracking-wider shadow-md transition-all"
+                  >
+                    Enviar Solicitud
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
@@ -96,7 +299,7 @@ export default function VendedorView({
           Portal de Locatarios
         </h2>
         <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1 leading-relaxed">
-          Sincronización de bajo consumo de datos y ancho de banda. Administra la disponibilidad y stock en caliente de tu local comercial.
+          Sincronización de bajo consumo de datos. Administra la disponibilidad y stock de tu local.
         </p>
       </div>
 
@@ -126,19 +329,8 @@ export default function VendedorView({
           {activeLocal && (
             <div className="flex flex-col gap-4">
               
-              {/* Account Restriction Warning */}
-              <div className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 flex gap-2.5 items-start text-left">
-                <span className="text-xs shrink-0 mt-0.5">⚠️</span>
-                <div>
-                  <h4 className="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest leading-none">Restricción de Cuenta Locatario</h4>
-                  <p className="text-[8.5px] text-slate-400 dark:text-slate-500 mt-1 leading-relaxed">
-                    Tu cuenta de Vendedor tiene una **relación estricta de 1:1** con este local de comida. La gestión de múltiples franquicias o cadenas de locales queda fuera del alcance de la demo.
-                  </p>
-                </div>
-              </div>
-
               {/* Local Info Badge */}
-              <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-805 rounded-2xl p-4 transition-colors">
+              <div className="bg-slate-50 dark:bg-slate-900 border border-slate-205 rounded-2xl p-4 transition-colors text-left">
                 <div className="flex items-center justify-between">
                   <span className="text-[9px] bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400 border border-emerald-250 dark:border-emerald-900 px-2 py-0.5 rounded font-black uppercase font-mono">
                     Aprobado y Visible
@@ -149,7 +341,7 @@ export default function VendedorView({
                 <p className="text-[11px] text-slate-400 dark:text-slate-500 font-semibold">{activeLocal.categoria}</p>
                 
                 <div className="mt-3 flex justify-between items-center bg-white dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Estado en vivo:</span>
+                  <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Estado de mi Local:</span>
                   <span className={`px-2 py-0.5 rounded text-[10px] font-black ${
                     activeLocal.estadoServicio === 'Abierto'
                       ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-400'
@@ -188,11 +380,11 @@ export default function VendedorView({
                 </button>
               </div>
 
-              {/* Tab Content 1: Operative Status Chips */}
+              {/* Tab Content 1: Operative Status Chips & JUNAEB control */}
               {activeTab === 'status' && (
-                <div className="flex flex-col gap-3 animate-fade-in">
+                <div className="flex flex-col gap-4 animate-fade-in text-left">
                   <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                    Seleccionar Estado del Local
+                    Seleccionar Estado de mi Local
                   </h4>
                   
                   <div className="grid grid-cols-2 gap-2.5">
@@ -214,12 +406,29 @@ export default function VendedorView({
                     })}
                   </div>
                   
-                  <p className="text-[9px] text-slate-400 dark:text-slate-500/80 leading-relaxed mt-1 text-center italic">
-                    Al presionar cualquiera de los chips de arriba, el estado en vivo de tu local cambiará inmediatamente en el mapa de los comensales.
-                  </p>
+                  {/* JUNAEB SWITCH CONTROL */}
+                  <div className="border-t border-slate-100 dark:border-slate-800 pt-3 flex flex-col gap-2">
+                    <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                      Medio de Pago JUNAEB
+                    </h4>
+                    <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl">
+                      <div>
+                        <span className="text-[10.5px] font-bold text-slate-700 dark:text-slate-200 block">¿Acepta JUNAEB actualmente?</span>
+                        <p className="text-[8px] text-slate-450 dark:text-slate-500 leading-tight">Desactívalo en caso de caída del validador Sodexo/Edenred.</p>
+                      </div>
+                      <button
+                        onClick={() => onToggleLocalJunaeb(activeLocal.id, !activeLocal.aceptaJunaeb)}
+                        className={`w-12 h-6 flex items-center rounded-full p-1 transition-all duration-300 cursor-pointer ${
+                          activeLocal.aceptaJunaeb ? 'bg-emerald-500 justify-end' : 'bg-slate-300 dark:bg-slate-800 justify-start'
+                        }`}
+                      >
+                        <span className="bg-white w-4 h-4 rounded-full shadow-md"></span>
+                      </button>
+                    </div>
+                  </div>
 
                   {/* Etiquetas del Local */}
-                  <div className="border-t border-slate-100 dark:border-slate-800 pt-3 mt-2 flex flex-col gap-2 text-left">
+                  <div className="border-t border-slate-100 dark:border-slate-800 pt-3 flex flex-col gap-2">
                     <h4 className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
                       Etiquetas del Local
                     </h4>
@@ -257,7 +466,7 @@ export default function VendedorView({
 
               {/* Tab Content 2: Menu / Product Manager */}
               {activeTab === 'menu' && (
-                <div className="flex flex-col gap-4 animate-fade-in">
+                <div className="flex flex-col gap-4 animate-fade-in text-left">
                   
                   {/* Inline Form to Add Product */}
                   <form onSubmit={handleAddProductSubmit} className="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-3.5 flex flex-col gap-2.5">
@@ -316,7 +525,7 @@ export default function VendedorView({
                               onClick={() => setConfirmItem(food)}
                               className={`flex flex-col items-start p-3 rounded-2xl border text-left transition-all hover:scale-[1.01] hover:shadow-sm ${
                                 isAgotado
-                                  ? 'bg-slate-50 dark:bg-slate-950 border-dashed border-slate-350 dark:border-slate-850 opacity-45'
+                                  ? 'bg-slate-50 dark:bg-slate-955 border-dashed border-slate-350 dark:border-slate-850 opacity-45'
                                   : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-emerald-500/50'
                               }`}
                             >
@@ -324,7 +533,7 @@ export default function VendedorView({
                                 <span className="text-lg">🍽️</span>
                                 <span className={`px-1.5 py-0.5 rounded text-[8px] font-black uppercase font-mono ${
                                   isAgotado
-                                    ? 'bg-rose-100 dark:bg-rose-955 text-rose-800 dark:text-rose-400 border border-rose-200 dark:border-rose-900'
+                                    ? 'bg-rose-100 dark:bg-rose-955 text-rose-800 dark:text-rose-455 border border-rose-200 dark:border-rose-900'
                                     : 'bg-emerald-100 dark:bg-emerald-955 text-emerald-800 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-900'
                                 }`}>
                                   {isAgotado ? 'Agotado' : 'Stock'}
@@ -382,7 +591,7 @@ export default function VendedorView({
                   className={`flex-1 py-2 rounded-xl text-[10px] font-black shadow-md transition-all active:scale-[0.98] ${
                     confirmItem.agotado 
                       ? 'bg-emerald-500 hover:bg-emerald-600 text-slate-950'
-                      : 'bg-rose-500 hover:bg-rose-600 text-white'
+                      : 'bg-rose-50 hover:bg-rose-600 text-white'
                   }`}
                 >
                   Confirmar
