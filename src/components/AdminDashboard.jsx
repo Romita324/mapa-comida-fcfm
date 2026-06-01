@@ -25,6 +25,7 @@ export default function AdminDashboard({
   const [adminTab, setAdminTab] = useState('reportes'); // 'reportes' | 'locales' | 'moderadores'
   const [banConfirmData, setBanConfirmData] = useState(null);
   const [banMotive, setBanMotive] = useState('');
+  const [discardConfirmData, setDiscardConfirmData] = useState(null);
 
   // Helper to find the review associated with a report
   const getReviewForReport = (report) => {
@@ -183,7 +184,7 @@ export default function AdminDashboard({
 
                       <div className="flex justify-end gap-2 pt-1">
                         <button
-                          onClick={() => onResolveReport(report.id, 'descartar', review?.id, review?.usuario)}
+                          onClick={() => setDiscardConfirmData({ reportId: report.id, reviewId: review?.id, username: review?.usuario })}
                           className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-xs transition-colors"
                         >
                           Descartar Reporte
@@ -403,7 +404,7 @@ export default function AdminDashboard({
                   setBanConfirmData(null);
                   setBanMotive('');
                 }}
-                className="flex-1 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-955 text-slate-550 dark:text-slate-450 rounded-xl text-[10px] font-bold transition-all active:scale-[0.98]"
+                className="flex-1 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl text-[10px] font-bold transition-all active:scale-[0.98]"
               >
                 Cancelar
               </button>
@@ -418,6 +419,39 @@ export default function AdminDashboard({
                 className="flex-1 py-2 bg-gradient-to-r from-rose-500 to-red-500 disabled:opacity-40 disabled:from-rose-500 disabled:to-rose-500 text-white rounded-xl text-[10px] font-black shadow-md transition-all active:scale-[0.98]"
               >
                 Confirmar y Registrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Discard Confirmation Modal */}
+      {discardConfirmData && (
+        <div className="fixed inset-0 z-[10002] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative animate-scale-up text-center flex flex-col gap-4">
+            <span className="text-3xl block">🛡️</span>
+            <h3 className="text-sm font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">Confirmar Descarte de Reporte</h3>
+            
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed">
+              ¿Estás seguro de que deseas descartar el reporte sobre el comentario del usuario <span className="font-extrabold text-emerald-500">@{discardConfirmData.username}</span>? El comentario se mantendrá visible en la plataforma y el reporte será archivado.
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setDiscardConfirmData(null)}
+                className="flex-1 py-2 border border-slate-350 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-355 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl text-[10px] font-bold transition-all active:scale-[0.98]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onResolveReport(discardConfirmData.reportId, 'descartar', discardConfirmData.reviewId, discardConfirmData.username);
+                  setDiscardConfirmData(null);
+                }}
+                className="flex-1 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 rounded-xl text-[10px] font-black shadow-md transition-all active:scale-[0.98]"
+              >
+                Confirmar Descarte
               </button>
             </div>
           </div>
