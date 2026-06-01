@@ -115,7 +115,7 @@ export default function Navbar({
 
           {/* Quick controls on mobile size (Theme & Bell) */}
           <div className={`flex items-center space-x-2 ${isMobile ? 'flex' : 'hidden'}`}>
-            {deviceMode === 'mobile' && windowWidth >= 768 && (
+            {deviceMode === 'mobile' && (
               <button 
                 onClick={() => setDeviceMode('browser')}
                 className="p-2 rounded-xl bg-emerald-100 hover:bg-emerald-200 dark:bg-emerald-950/60 dark:hover:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-800 text-emerald-600 dark:text-emerald-400 text-xs shrink-0 font-bold transition-colors"
@@ -304,11 +304,11 @@ export default function Navbar({
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
                 className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-950 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors relative shrink-0"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4 h-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-5 h-5 text-slate-500 dark:text-slate-400">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                 </svg>
                 {unreadNotificationsCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 flex h-2 w-2 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900"></span>
+                  <span className="absolute top-2 right-2 flex h-2 w-2 rounded-full bg-emerald-500 border border-white dark:border-slate-900 shadow-sm"></span>
                 )}
               </button>
               {notificationDrawer}
