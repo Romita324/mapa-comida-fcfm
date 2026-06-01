@@ -556,7 +556,7 @@ export default function App() {
                 Beauchef Eats
               </h1>
               <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mt-1.5 font-mono">
-                Mapa de Comida FCFM • Demo MVP
+                Mapa de Comida FCFM
               </p>
             </div>
           </div>

@@ -109,15 +109,8 @@ export default function ComensalView({
     });
   };
 
-  // Extract unique categories dynamically based on visible locals (except category filter itself)
-  const visibleLocalesForCategories = locales.filter(local => {
-    if (local.distanciaKm > maxDistance) return false;
-    if (filterJunaeb && !local.aceptaJunaeb) return false;
-    if (filterFavorites && !isGuest && !favoritos.includes(local.id)) return false;
-    if (filterStatus !== 'All' && local.estadoServicio !== filterStatus) return false;
-    return true;
-  });
-  const categories = ['All', ...new Set(visibleLocalesForCategories.map(l => l.categoria))];
+  // Extract unique categories dynamically based on the global array of active locales
+  const categories = ['All', ...new Set(locales.map(l => l.categoria))];
 
   const handleSelectLocal = (local) => {
     setSelectedLocal(local);
