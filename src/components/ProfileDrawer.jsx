@@ -177,7 +177,7 @@ export default function ProfileDrawer({
                       placeholder="ej: diego_inge"
                       value={regUsername}
                       onChange={(e) => setRegUsername(e.target.value)}
-                      className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-805 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 transition-colors"
+                      className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                     />
                   </div>
 
@@ -186,7 +186,7 @@ export default function ProfileDrawer({
                     <select 
                       value={regRole}
                       onChange={(e) => setRegRole(e.target.value)}
-                      className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-805 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 font-bold transition-colors"
+                      className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-bold transition-colors"
                     >
                       <option value="comensal">Comensal</option>
                       <option value="vendedor">Vendedor / Locatario</option>
@@ -223,7 +223,7 @@ export default function ProfileDrawer({
                       placeholder="ej: juan_perez"
                       value={modUsuario}
                       onChange={(e) => setModUsuario(e.target.value)}
-                      className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 transition-colors"
+                      className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                     />
                   </div>
 
@@ -235,7 +235,7 @@ export default function ProfileDrawer({
                       placeholder="12.345.678-9"
                       value={modRut}
                       onChange={(e) => setModRut(e.target.value)}
-                      className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 transition-colors"
+                      className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-mono transition-colors"
                     />
                   </div>
 
@@ -247,7 +247,7 @@ export default function ProfileDrawer({
                       placeholder="¿Por qué deseas sumarte como moderador de la comunidad?"
                       value={modMotivacion}
                       onChange={(e) => setModMotivacion(e.target.value)}
-                      className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 transition-colors resize-none"
+                      className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors resize-none"
                     />
                   </div>
 
@@ -356,7 +356,7 @@ export default function ProfileDrawer({
                           placeholder="ej: Casino Central FCFM"
                           value={localNombre}
                           onChange={(e) => setLocalNombre(e.target.value)}
-                          className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 transition-colors"
+                          className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                         />
                       </div>
 
@@ -366,7 +366,7 @@ export default function ProfileDrawer({
                           <select 
                             value={localCategoria}
                             onChange={(e) => setLocalCategoria(e.target.value)}
-                            className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 font-bold transition-colors"
+                            className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-bold transition-colors"
                           >
                             <option value="Almuerzos">Almuerzos</option>
                             <option value="Fast Food">Fast Food</option>
@@ -446,7 +446,7 @@ export default function ProfileDrawer({
                                 placeholder="Plato/Bebida"
                                 value={menuItem.item}
                                 onChange={(e) => handleMenuChange(idx, 'item', e.target.value)}
-                                className="flex-1 text-xs p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 transition-colors"
+                                className="flex-1 text-xs p-1.5 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                               />
                               <input 
                                 type="number" 
@@ -454,7 +454,7 @@ export default function ProfileDrawer({
                                 placeholder="Precio ($)"
                                 value={menuItem.precio}
                                 onChange={(e) => handleMenuChange(idx, 'precio', e.target.value)}
-                                className="w-20 text-xs p-1.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 font-mono font-bold transition-colors"
+                                className="w-20 text-xs p-1.5 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-mono font-bold transition-colors"
                               />
                               {menuItems.length > 1 && (
                                 <button 

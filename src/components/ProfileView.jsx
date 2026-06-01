@@ -115,16 +115,16 @@ export default function ProfileView({
                   type="text" 
                   value={comNombre} 
                   onChange={(e) => setComNombre(e.target.value)} 
-                  className="w-full text-xs p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                 />
               </div>
               <div>
-                <label className="text-[8px] text-slate-450 dark:text-slate-500 uppercase tracking-widest font-black block mb-1">Apellido</label>
+                <label className="text-[8px] text-slate-455 dark:text-slate-500 uppercase tracking-widest font-black block mb-1">Apellido</label>
                 <input 
                   type="text" 
                   value={comApellido} 
                   onChange={(e) => setComApellido(e.target.value)} 
-                  className="w-full text-xs p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                  className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                 />
               </div>
             </div>
@@ -133,7 +133,7 @@ export default function ProfileView({
               <select 
                 value={comPreferencia} 
                 onChange={(e) => setComPreferencia(e.target.value)} 
-                className="w-full text-xs p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-slate-850 dark:text-slate-100 focus:outline-none focus:border-emerald-500 font-bold"
+                className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-bold transition-colors"
               >
                 <option value="Ninguna">Ninguna / Todo</option>
                 <option value="Vegana">Vegana</option>
@@ -158,7 +158,7 @@ export default function ProfileView({
                 placeholder="••••••••" 
                 value={currPassword} 
                 onChange={(e) => setCurrPassword(e.target.value)}
-                className="w-full text-xs p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+                className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-mono transition-colors"
               />
             </div>
             <div>
@@ -168,7 +168,7 @@ export default function ProfileView({
                 placeholder="••••••••" 
                 value={newPassword} 
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full text-xs p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+                className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-mono transition-colors"
               />
             </div>
             <button type="submit" className="w-full py-2 bg-slate-900 dark:bg-slate-850 hover:bg-slate-850 text-white font-black rounded-xl text-[10px] uppercase tracking-wider shadow-md transition-all active:scale-[0.98]">
@@ -201,7 +201,7 @@ export default function ProfileView({
                 type="text" 
                 value={venNombreLocatario} 
                 onChange={(e) => setVenNombreLocatario(e.target.value)} 
-                className="w-full text-xs p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
               />
             </div>
             <div>
@@ -210,7 +210,7 @@ export default function ProfileView({
                 type="text" 
                 value={venTelefono} 
                 onChange={(e) => setVenTelefono(e.target.value)} 
-                className="w-full text-xs p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+                className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-mono transition-colors"
               />
             </div>
             <div className="opacity-75">
@@ -219,7 +219,7 @@ export default function ProfileView({
                 type="text" 
                 disabled 
                 value={registeredUser?.rut || '12.345.678-9'} 
-                className="w-full text-xs p-2 rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-900 text-slate-400 dark:text-slate-600 font-mono cursor-not-allowed"
+                className="w-full text-xs p-2 rounded-lg bg-slate-50 text-slate-500 border border-slate-250 font-mono cursor-not-allowed"
               />
             </div>
             <button type="submit" className="w-full py-2 bg-emerald-500 text-slate-950 font-black rounded-xl text-[10px] uppercase tracking-wider shadow-md transition-all active:scale-[0.98]">
@@ -237,7 +237,7 @@ export default function ProfileView({
                 placeholder="••••••••" 
                 value={currPassword} 
                 onChange={(e) => setCurrPassword(e.target.value)}
-                className="w-full text-xs p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+                className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-mono transition-colors"
               />
             </div>
             <div>
@@ -247,7 +247,7 @@ export default function ProfileView({
                 placeholder="••••••••" 
                 value={newPassword} 
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full text-xs p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-850 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500 font-mono"
+                className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-mono transition-colors"
               />
             </div>
             <button type="submit" className="w-full py-2 bg-slate-900 dark:bg-slate-850 hover:bg-slate-850 text-white font-black rounded-xl text-[10px] uppercase tracking-wider shadow-md transition-all active:scale-[0.98]">
@@ -371,7 +371,7 @@ export default function ProfileView({
                     placeholder="12.345.678-9"
                     value={modRut}
                     onChange={(e) => setModRut(e.target.value)}
-                    className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 font-mono"
+                    className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-mono transition-colors"
                   />
                 </div>
                 <div>
@@ -382,11 +382,11 @@ export default function ProfileView({
                     placeholder="¿Por qué deseas sumarte como moderador?"
                     value={modMotivacion}
                     onChange={(e) => setModMotivacion(e.target.value)}
-                    className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 resize-none"
+                    className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 resize-none transition-colors"
                   />
                 </div>
                 <div className="flex gap-2">
-                  <button type="button" onClick={() => setIsApplying(false)} className="flex-1 py-1.5 border border-slate-205 dark:border-slate-800 text-slate-550 dark:text-slate-400 rounded-lg text-[9px] font-bold">
+                  <button type="button" onClick={() => setIsApplying(false)} className="flex-1 py-1.5 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 rounded-lg text-[9px] font-bold">
                     Cancelar
                   </button>
                   <button type="submit" className="flex-1 py-1.5 bg-emerald-500 text-slate-950 font-black rounded-lg text-[9px] uppercase tracking-wider">

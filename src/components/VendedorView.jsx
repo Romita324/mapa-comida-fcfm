@@ -177,7 +177,7 @@ export default function VendedorView({
                     placeholder="Ej: Jugos Beauchef"
                     value={regLocalNombre}
                     onChange={(e) => setRegLocalNombre(e.target.value)}
-                    className="w-full text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 focus:outline-none focus:border-emerald-500"
+                    className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                   />
                 </div>
 
@@ -187,7 +187,7 @@ export default function VendedorView({
                     <select
                       value={regLocalCategoria}
                       onChange={(e) => setRegLocalCategoria(e.target.value)}
-                      className="w-full text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-emerald-500"
+                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-bold transition-colors"
                     >
                       <option value="Casino">Casino</option>
                       <option value="Cafetería">Cafetería</option>
@@ -203,7 +203,7 @@ export default function VendedorView({
                     <select
                       value={regLocalPreset}
                       onChange={(e) => setRegLocalPreset(e.target.value)}
-                      className="w-full text-xs p-2.5 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 font-bold focus:outline-none focus:border-emerald-500"
+                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-bold transition-colors"
                     >
                       {Object.keys(locationPresets).map(preset => (
                         <option key={preset} value={preset}>{preset}</option>
@@ -232,14 +232,14 @@ export default function VendedorView({
                       placeholder="Producto"
                       value={tempItemName}
                       onChange={(e) => setTempItemName(e.target.value)}
-                      className="flex-1 text-[11px] p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100"
+                      className="flex-1 text-[11px] p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                     />
                     <input
                       type="number"
                       placeholder="Precio"
                       value={tempItemPrice}
                       onChange={(e) => setTempItemPrice(e.target.value)}
-                      className="w-16 text-[11px] p-2 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100"
+                      className="w-16 text-[11px] p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                     />
                     <button
                       type="button"
@@ -271,7 +271,7 @@ export default function VendedorView({
                       setRegLocalMenu([]);
                       setIsRegModalOpen(false);
                     }}
-                    className="flex-1 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-350 rounded-xl text-[10px] font-bold transition-all"
+                    className="flex-1 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 rounded-xl text-[10px] font-bold transition-all"
                   >
                     Cancelar
                   </button>
@@ -317,7 +317,7 @@ export default function VendedorView({
               <select
                 value={selectedOption || (activeLocal ? activeLocal.id : '')}
                 onChange={(e) => setSelectedOption(e.target.value)}
-                className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-3 py-2.5 text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500 font-bold w-full transition-colors"
+                className="bg-white border border-slate-300 rounded-xl px-3 py-2.5 text-xs text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 font-bold w-full transition-colors"
               >
                 {myLocales.map(l => (
                   <option key={l.id} value={l.id}>🏪 {l.nombre}</option>
@@ -480,7 +480,7 @@ export default function VendedorView({
                         placeholder="Nombre (ej: Jugo Natural)"
                         value={newProductName}
                         onChange={(e) => setNewProductName(e.target.value)}
-                        className="flex-1 text-[11px] p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-205 dark:border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 transition-colors"
+                        className="flex-1 text-[11px] p-2 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                       />
                       <input
                         type="number"
@@ -488,7 +488,7 @@ export default function VendedorView({
                         placeholder="Precio ($)"
                         value={newProductPrice}
                         onChange={(e) => setNewProductPrice(e.target.value)}
-                        className="w-20 text-[11px] p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-205 dark:border-slate-805 focus:outline-none focus:border-emerald-500 text-slate-800 dark:text-slate-200 font-mono font-bold transition-colors"
+                        className="w-20 text-[11px] p-2 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-mono font-bold transition-colors"
                       />
                     </div>
                     <button
@@ -581,7 +581,7 @@ export default function VendedorView({
                 <button
                   type="button"
                   onClick={() => setConfirmItem(null)}
-                  className="flex-1 py-2 border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 text-slate-655 dark:text-slate-400 rounded-xl text-[10px] font-bold transition-all active:scale-[0.98]"
+                  className="flex-1 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 rounded-xl text-[10px] font-bold transition-all active:scale-[0.98]"
                 >
                   Cancelar
                 </button>

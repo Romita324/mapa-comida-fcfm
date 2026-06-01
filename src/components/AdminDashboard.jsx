@@ -393,7 +393,7 @@ export default function AdminDashboard({
                 value={banMotive}
                 onChange={(e) => setBanMotive(e.target.value)}
                 placeholder="Indica la justificación legal/técnica..."
-                className="w-full text-xs p-2 rounded-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-rose-500 text-slate-850 dark:text-slate-200 resize-none font-sans"
+                className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 resize-none font-sans"
               />
             </div>
 
@@ -404,7 +404,7 @@ export default function AdminDashboard({
                   setBanConfirmData(null);
                   setBanMotive('');
                 }}
-                className="flex-1 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl text-[10px] font-bold transition-all active:scale-[0.98]"
+                className="flex-1 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 rounded-xl text-[10px] font-bold transition-all active:scale-[0.98]"
               >
                 Cancelar
               </button>
@@ -439,7 +439,7 @@ export default function AdminDashboard({
               <button
                 type="button"
                 onClick={() => setDiscardConfirmData(null)}
-                className="flex-1 py-2 border border-slate-350 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-355 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl text-[10px] font-bold transition-all active:scale-[0.98]"
+                className="flex-1 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 rounded-xl text-[10px] font-bold transition-all active:scale-[0.98]"
               >
                 Cancelar
               </button>

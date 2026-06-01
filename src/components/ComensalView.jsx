@@ -900,7 +900,7 @@ export default function ComensalView({
                     value={newComment}
                     onChange={(e) => setNewComment(e.target.value)}
                     placeholder="Comparte tu experiencia con este local..."
-                    className="w-full p-2 text-xs rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-850 dark:text-slate-250 focus:outline-none focus:border-emerald-500 resize-none font-sans"
+                    className="w-full p-2 text-xs rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 resize-none font-sans"
                   />
 
                   <button
@@ -934,7 +934,7 @@ export default function ComensalView({
               <button
                 type="button"
                 onClick={() => setReportConfirmData(null)}
-                className="flex-1 py-2 border border-slate-350 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-700 dark:text-slate-355 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-xl text-[10px] font-bold transition-all active:scale-[0.98]"
+                className="flex-1 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 dark:bg-slate-950 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-900 rounded-xl text-[10px] font-bold transition-all active:scale-[0.98]"
               >
                 Cancelar
               </button>

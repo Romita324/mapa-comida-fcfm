@@ -719,7 +719,7 @@ export default function App() {
                         placeholder="Juan"
                         value={comNombre}
                         onChange={(e) => setComNombre(e.target.value)}
-                        className="w-full text-xs p-2.5 rounded-xl bg-slate-950 border border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-100 transition-colors"
+                        className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                       />
                     </div>
                     <div>
@@ -730,7 +730,7 @@ export default function App() {
                         placeholder="Perez"
                         value={comApellido}
                         onChange={(e) => setComApellido(e.target.value)}
-                        className="w-full text-xs p-2.5 rounded-xl bg-slate-955 border border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-100 transition-colors"
+                        className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                       />
                     </div>
                   </div>
@@ -742,7 +742,7 @@ export default function App() {
                       placeholder="juan.perez@ing.uchile.cl"
                       value={comCorreo}
                       onChange={(e) => setComCorreo(e.target.value)}
-                      className="w-full text-xs p-2.5 rounded-xl bg-slate-955 border border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-100 transition-colors"
+                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                     />
                   </div>
                   <div>
@@ -753,7 +753,7 @@ export default function App() {
                       placeholder="••••••••"
                       value={comPassword}
                       onChange={(e) => setComPassword(e.target.value)}
-                      className="w-full text-xs p-2.5 rounded-xl bg-slate-955 border border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-100 transition-colors"
+                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                     />
                   </div>
                   <div>
@@ -761,7 +761,7 @@ export default function App() {
                     <select
                       value={comPreferencia}
                       onChange={(e) => setComPreferencia(e.target.value)}
-                      className="w-full text-xs p-2.5 rounded-xl bg-slate-955 border border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-100 font-bold transition-colors"
+                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-bold transition-colors"
                     >
                       <option value="Ninguna">Ninguna / Todo</option>
                       <option value="Vegana">Vegana</option>
@@ -805,7 +805,7 @@ export default function App() {
                       placeholder="Pedro Gómez"
                       value={venNombre}
                       onChange={(e) => setVenNombre(e.target.value)}
-                      className="w-full text-xs p-2.5 rounded-xl bg-slate-955 border border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-100 transition-colors"
+                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                     />
                   </div>
                   <div>
@@ -816,7 +816,7 @@ export default function App() {
                       placeholder="pedro.gomez@gmail.com"
                       value={venCorreo}
                       onChange={(e) => setVenCorreo(e.target.value)}
-                      className="w-full text-xs p-2.5 rounded-xl bg-slate-955 border border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-100 transition-colors"
+                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                     />
                   </div>
                   <div>
@@ -827,7 +827,7 @@ export default function App() {
                       placeholder="••••••••"
                       value={venPassword}
                       onChange={(e) => setVenPassword(e.target.value)}
-                      className="w-full text-xs p-2.5 rounded-xl bg-slate-955 border border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-100 transition-colors"
+                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -839,7 +839,7 @@ export default function App() {
                         placeholder="18.765.432-1"
                         value={venRut}
                         onChange={(e) => setVenRut(e.target.value)}
-                        className="w-full text-xs p-2.5 rounded-xl bg-slate-955 border border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-100 transition-colors font-mono"
+                        className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors font-mono"
                       />
                     </div>
                     <div>
@@ -850,7 +850,7 @@ export default function App() {
                         placeholder="+56998765432"
                         value={venTelefono}
                         onChange={(e) => setVenTelefono(e.target.value)}
-                        className="w-full text-xs p-2.5 rounded-xl bg-slate-955 border border-slate-800 focus:outline-none focus:border-emerald-500 text-slate-100 transition-colors font-mono"
+                        className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors font-mono"
                       />
                     </div>
                   </div>
