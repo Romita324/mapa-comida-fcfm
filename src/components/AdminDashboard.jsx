@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function AdminView({ 
+export default function AdminDashboard({ 
   locales, 
   reseñas, 
   reportesSeguridad, 
@@ -23,6 +23,9 @@ export default function AdminView({
 
   const isMobile = deviceMode === 'mobile' || windowWidth < 1024;
   const [adminTab, setAdminTab] = useState('reportes'); // 'reportes' | 'locales' | 'moderadores'
+  const [banConfirmData, setBanConfirmData] = useState(null);
+  const [banMotive, setBanMotive] = useState('');
+  const [discardConfirmData, setDiscardConfirmData] = useState(null);
 
   // Helper to find the review associated with a report
   const getReviewForReport = (report) => {
@@ -163,7 +166,7 @@ export default function AdminView({
                       {review ? (
                         <div className="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 flex flex-col gap-1.5 transition-colors">
                           <div className="flex justify-between items-center text-xs">
-                            <span className="font-bold text-slate-700 dark:text-slate-300 font-mono">@{review.usuario}</span>
+                            <span className="font-bold text-slate-700 dark:text-slate-350 font-mono">@{review.usuario}</span>
                             <span className="text-amber-500 font-mono text-[9px]">
                               {'★'.repeat(review.calificacion)}
                               {'☆'.repeat(5 - review.calificacion)}
@@ -181,13 +184,13 @@ export default function AdminView({
 
                       <div className="flex justify-end gap-2 pt-1">
                         <button
-                          onClick={() => onResolveReport(report.id, 'descartar', review?.id, review?.usuario)}
+                          onClick={() => setDiscardConfirmData({ reportId: report.id, reviewId: review?.id, username: review?.usuario })}
                           className="px-3 py-1.5 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-xl text-xs transition-colors"
                         >
                           Descartar Reporte
                         </button>
                         <button
-                          onClick={() => onResolveReport(report.id, 'banear', review?.id, review?.usuario)}
+                          onClick={() => setBanConfirmData({ reportId: report.id, reviewId: review?.id, username: review?.usuario })}
                           className="px-3 py-1.5 bg-gradient-to-r from-rose-500 to-red-500 text-white font-bold rounded-xl text-xs shadow hover:opacity-95"
                         >
                           Banear Usuario / Borrar
@@ -200,7 +203,7 @@ export default function AdminView({
                 {pendingReports.length === 0 && (
                   <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center shadow transition-colors">
                     <p className="text-xs font-bold text-slate-400">¡Bandeja de reportes de comensales limpia!</p>
-                    <p className="text-[10px] text-slate-500 mt-1">No hay denuncias de trolls pendientes.</p>
+                    <p className="text-[10px] text-slate-505 mt-1">No hay denuncias de trolls pendientes.</p>
                   </div>
                 )}
               </div>
@@ -255,7 +258,7 @@ export default function AdminView({
                 <div key={req.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow flex flex-col gap-3 transition-colors">
                   <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-2">
                     <div>
-                      <span className="text-[8px] bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900 px-2.5 py-0.5 rounded font-black uppercase font-mono">
+                      <span className="text-[8px] bg-amber-100 dark:bg-amber-955 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-900 px-2.5 py-0.5 rounded font-black uppercase font-mono">
                         Petición de Vendedor
                       </span>
                       <h4 className="text-xs font-black text-slate-800 dark:text-slate-200 mt-2">{req.nombre}</h4>
@@ -286,7 +289,7 @@ export default function AdminView({
                   <div className="flex justify-end gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
                     <button
                       onClick={() => onRejectLocal(req.id)}
-                      className="px-3.5 py-1.5 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800 text-rose-500 font-bold rounded-xl text-xs transition-colors"
+                      className="px-3.5 py-1.5 bg-slate-50 dark:bg-slate-955 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800 text-rose-505 font-bold rounded-xl text-xs transition-colors"
                     >
                       Rechazar Ingreso
                     </button>
@@ -345,7 +348,7 @@ export default function AdminView({
                   <div className="flex justify-end gap-2 pt-1 border-t border-slate-100 dark:border-slate-800">
                     <button
                       onClick={() => onRejectModerador(app.id)}
-                      className="px-3.5 py-1.5 bg-slate-50 dark:bg-slate-950 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800 text-rose-500 font-bold rounded-xl text-xs transition-colors"
+                      className="px-3.5 py-1.5 bg-slate-50 dark:bg-slate-955 hover:bg-slate-100 dark:hover:bg-slate-900 border border-slate-200 dark:border-slate-800 text-rose-505 font-bold rounded-xl text-xs transition-colors"
                     >
                       Rechazar Solicitud
                     </button>
@@ -370,6 +373,91 @@ export default function AdminView({
         )}
 
       </div>
+
+      {/* Ban Confirmation Modal */}
+      {banConfirmData && (
+        <div className="fixed inset-0 z-[10002] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative animate-scale-up text-center flex flex-col gap-4">
+            <span className="text-3xl block">⚠️</span>
+            <h3 className="text-sm font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">Confirmar Acción Irreversible</h3>
+            
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed">
+              Estás a punto de banear al usuario <span className="font-extrabold text-rose-500 font-mono">@{banConfirmData.username}</span> y eliminar permanentemente su reseña. Esta acción se registrará de forma inmutable en la bitácora de auditoría.
+            </p>
+
+            <div className="text-left">
+              <label className="text-[9px] text-slate-400 dark:text-slate-500 uppercase tracking-widest font-bold block mb-1">Motivo del Baneo (Obligatorio)</label>
+              <textarea
+                required
+                rows={2}
+                value={banMotive}
+                onChange={(e) => setBanMotive(e.target.value)}
+                placeholder="Indica la justificación legal/técnica..."
+                className="w-full text-xs p-2 rounded-lg bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 resize-none font-sans"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setBanConfirmData(null);
+                  setBanMotive('');
+                }}
+                className="flex-1 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 rounded-xl text-[10px] font-bold transition-all active:scale-[0.98]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={!banMotive.trim()}
+                onClick={() => {
+                  onResolveReport(banConfirmData.reportId, 'banear', banConfirmData.reviewId, banConfirmData.username, banMotive.trim());
+                  setBanConfirmData(null);
+                  setBanMotive('');
+                }}
+                className="flex-1 py-2 bg-gradient-to-r from-rose-500 to-red-500 disabled:opacity-40 disabled:from-rose-500 disabled:to-rose-500 text-white rounded-xl text-[10px] font-black shadow-md transition-all active:scale-[0.98]"
+              >
+                Confirmar y Registrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Discard Confirmation Modal */}
+      {discardConfirmData && (
+        <div className="fixed inset-0 z-[10002] bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl relative animate-scale-up text-center flex flex-col gap-4">
+            <span className="text-3xl block">🛡️</span>
+            <h3 className="text-sm font-black text-slate-850 dark:text-slate-100 uppercase tracking-wider">Confirmar Descarte de Reporte</h3>
+            
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 leading-relaxed">
+              ¿Estás seguro de que deseas descartar el reporte sobre el comentario del usuario <span className="font-extrabold text-emerald-500">@{discardConfirmData.username}</span>? El comentario se mantendrá visible en la plataforma y el reporte será archivado.
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setDiscardConfirmData(null)}
+                className="flex-1 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 rounded-xl text-[10px] font-bold transition-all active:scale-[0.98]"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onResolveReport(discardConfirmData.reportId, 'descartar', discardConfirmData.reviewId, discardConfirmData.username);
+                  setDiscardConfirmData(null);
+                }}
+                className="flex-1 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 rounded-xl text-[10px] font-black shadow-md transition-all active:scale-[0.98]"
+              >
+                Confirmar Descarte
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

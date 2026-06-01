@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import ComensalView from './components/ComensalView';
 import VendedorView from './components/VendedorView';
-import AdminView from './components/AdminView';
-import ProfileDrawer from './components/ProfileDrawer';
+import AdminDashboard from './components/AdminDashboard';
+import ProfileView from './components/ProfileView';
 
 // Import initial database mocks
 import { 
@@ -15,7 +15,25 @@ import {
 
 export default function App() {
   const [activeView, setActiveView] = useState('comensal'); // 'comensal', 'vendedor', 'admin', 'invitado'
-  const [registeredUser, setRegisteredUser] = useState({ username: 'comensal_demo', role: 'comensal' });
+  const [registeredUser, setRegisteredUser] = useState({ username: 'comensal_demo', role: 'comensal', nombre: 'Comensal', apellido: 'Demo', correo: 'comensal@fcfm.cl', preferencias: 'Ninguna' });
+  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [onboardingTab, setOnboardingTab] = useState('login'); // 'login' | 'register'
+  const [regRole, setRegRole] = useState('comensal'); // 'comensal' | 'vendedor'
+  
+  // Registration Form States
+  // Comensal
+  const [comNombre, setComNombre] = useState('');
+  const [comApellido, setComApellido] = useState('');
+  const [comCorreo, setComCorreo] = useState('');
+  const [comPassword, setComPassword] = useState('');
+  const [comPreferencia, setComPreferencia] = useState('Ninguna');
+
+  // Vendedor
+  const [venNombre, setVenNombre] = useState('');
+  const [venCorreo, setVenCorreo] = useState('');
+  const [venPassword, setVenPassword] = useState('');
+  const [venRut, setVenRut] = useState('');
+  const [venTelefono, setVenTelefono] = useState('');
 
   const handleActiveViewChange = (view) => {
     setActiveView(view);
@@ -39,10 +57,10 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'system');
   const [deviceMode, setDeviceMode] = useState('browser'); // 'browser' | 'mobile'
   const [favoritos, setFavoritos] = useState([2]); // Casino Central is favorited by default
+  const [filterFavorites, setFilterFavorites] = useState(false);
   const [solicitudesVendedor, setSolicitudesVendedor] = useState([]);
   const [solicitudesModerador, setSolicitudesModerador] = useState([]);
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Simulated notifications
   const [notifications, setNotifications] = useState([
@@ -173,7 +191,7 @@ export default function App() {
   };
 
   // HANDLER: Admin resolves security reviews
-  const handleResolveReport = (reportId, action, reviewId, username) => {
+  const handleResolveReport = (reportId, action, reviewId, username, reason = '') => {
     const timestamp = new Date().toLocaleDateString('es-CL') + ' ' + new Date().toLocaleTimeString('es-CL');
 
     if (action === 'banear') {
@@ -184,7 +202,7 @@ export default function App() {
 
       const newLog = {
         id: Date.now(),
-        accion: `Admin eliminó reseña ID ${reviewId} y bloqueó al usuario '${username || 'desconocido'}' por trolling.`,
+        accion: `Admin eliminó reseña ID ${reviewId} y bloqueó al usuario '${username || 'desconocido'}' por trolling. Motivo: ${reason || 'Sin motivo especificado'}`,
         fecha: timestamp
       };
       setAuditLogs(prev => [newLog, ...prev]);
@@ -227,12 +245,61 @@ export default function App() {
       categoria: solicitudData.categoria,
       aceptaJunaeb: solicitudData.aceptaJunaeb,
       menu: solicitudData.menu.map(item => ({ ...item, agotado: false })),
-      coordenadas: [-33.4581 + (Math.random() - 0.5) * 0.008, -70.6642 + (Math.random() - 0.5) * 0.008], // Random near FCFM
+      coordenadas: solicitudData.coordenadas || [-33.4581 + (Math.random() - 0.5) * 0.008, -70.6642 + (Math.random() - 0.5) * 0.008],
       estado: 'Pendiente',
       vendedorUsername: registeredUser ? registeredUser.username : 'vendedor_demo'
     };
     setSolicitudesVendedor(prev => [...prev, newSolicitud]);
     addToast("Solicitud de local enviada al Administrador", "success");
+  };
+
+  const handleAddReview = (localId, rating, comment) => {
+    const newReview = {
+      id: Date.now(),
+      localId,
+      usuario: registeredUser ? registeredUser.username : 'Invitado',
+      calificacion: rating,
+      comentario: comment,
+      votosUtilidad: 0,
+      fecha: "Ahora",
+      reportado: false
+    };
+    setReseñasList(prev => [newReview, ...prev]);
+    addToast("Reseña agregada en vivo", "success");
+  };
+
+  const handleVoteHelpful = (reviewId, isIncrement = true) => {
+    setReseñasList(prev =>
+      prev.map(r => r.id === reviewId ? { ...r, votosUtilidad: Math.max(0, (r.votosUtilidad || 0) + (isIncrement ? 1 : -1)) } : r)
+    );
+  };
+
+  const handleUpdateLocalTags = (localId, updatedTags) => {
+    setLocalesList(prev => 
+      prev.map(l => l.id === localId ? { ...l, tags: updatedTags } : l)
+    );
+    addToast("Etiquetas del local actualizadas", "success");
+  };
+
+  const handleLogout = () => {
+    setRegisteredUser(null);
+    setActiveView('comensal');
+    setShowOnboarding(true);
+    setOnboardingTab('login');
+  };
+
+  const handleToggleLocalJunaeb = (localId, acceptsJunaeb) => {
+    setLocalesList(prev => 
+      prev.map(l => l.id === localId ? { ...l, aceptaJunaeb: acceptsJunaeb } : l)
+    );
+    addToast(acceptsJunaeb ? "Convenio JUNAEB habilitado" : "Convenio JUNAEB deshabilitado", "success");
+  };
+
+  const handleUpdateUserDetails = (updatedDetails) => {
+    setRegisteredUser(prev => ({
+      ...prev,
+      ...updatedDetails
+    }));
   };
 
   // HANDLER: Vendedor updates local menu (e.g. toggles item out-of-stock)
@@ -367,7 +434,10 @@ export default function App() {
         notifications={notifications}
         setNotifications={setNotifications}
         onOpenMonthlySummary={() => setIsSummaryOpen(true)}
-        onOpenProfile={() => setIsProfileOpen(true)}
+        onOpenProfile={() => {
+          setActiveView('perfil');
+        }}
+        onLogout={handleLogout}
       />
 
       <main className="flex-1 w-full flex flex-col min-h-0 relative">
@@ -377,11 +447,15 @@ export default function App() {
             locales={localesList} 
             reseñas={reseñasList} 
             onReportReview={handleReportReview}
+            onVoteHelpful={handleVoteHelpful}
             favoritos={favoritos}
             onToggleFavorite={handleToggleFavorite}
             isGuest={false}
             theme={theme}
             deviceMode={deviceMode}
+            filterFavorites={filterFavorites}
+            setFilterFavorites={setFilterFavorites}
+            onAddReview={handleAddReview}
           />
         )}
 
@@ -391,11 +465,45 @@ export default function App() {
             locales={localesList} 
             reseñas={reseñasList} 
             onReportReview={handleReportReview}
+            onVoteHelpful={handleVoteHelpful}
             favoritos={[]}
             onToggleFavorite={handleToggleFavorite}
             isGuest={true}
             theme={theme}
             deviceMode={deviceMode}
+            filterFavorites={false}
+            setFilterFavorites={() => {}}
+            onAddReview={() => {}}
+          />
+        )}
+
+        {/* PROFILE VIEW */}
+        {activeView === 'perfil' && (
+          <ProfileView 
+            registeredUser={registeredUser}
+            favoritos={favoritos}
+            locales={localesList}
+            onToggleFavorite={handleToggleFavorite}
+            onGoBack={() => {
+              if (registeredUser && registeredUser.role === 'vendedor') {
+                setActiveView('vendedor');
+              } else {
+                setActiveView('comensal');
+              }
+            }}
+            solicitudesModerador={solicitudesModerador}
+            onPostularModerador={handlePostularModerador}
+            onFilterFavoritesOnMap={() => {
+              setFilterFavorites(true);
+              setActiveView('comensal');
+            }}
+            solicitudesVendedor={solicitudesVendedor}
+            onUpdateUserDetails={handleUpdateUserDetails}
+            onGoToRegister={() => {
+              setOnboardingTab('register');
+              setShowOnboarding(true);
+            }}
+            addToast={addToast}
           />
         )}
         
@@ -406,12 +514,16 @@ export default function App() {
             onUpdateLocalStatus={handleUpdateLocalStatus}
             registeredUser={registeredUser}
             onUpdateLocalMenu={handleUpdateLocalMenu}
+            onUpdateLocalTags={handleUpdateLocalTags}
+            solicitudesVendedor={solicitudesVendedor}
+            onRegisterNewLocal={handleRegisterNewLocal}
+            onToggleLocalJunaeb={handleToggleLocalJunaeb}
           />
         )}
         
-        {/* ADMIN VIEW */}
+        {/* ADMIN DASHBOARD */}
         {activeView === 'admin' && (
-          <AdminView 
+          <AdminDashboard 
             locales={localesList} 
             reseñas={reseñasList} 
             reportesSeguridad={reportesList} 
@@ -432,28 +544,343 @@ export default function App() {
         &copy; {new Date().getFullYear()} Beauchef Eats - DCC FCFM. Prototipo V2.
       </footer>
 
-      {/* Unified User Profile Drawer */}
-      <ProfileDrawer 
-        isOpen={isProfileOpen}
-        onClose={() => setIsProfileOpen(false)}
-        activeView={activeView}
-        solicitudesModerador={solicitudesModerador}
-        onPostularModerador={handlePostularModerador}
-        solicitudesVendedor={solicitudesVendedor}
-        onRegisterNewLocal={handleRegisterNewLocal}
-        locales={localesList}
-        reseñas={reseñasList}
-        reportesList={reportesList}
-        favoritos={favoritos}
-        registeredUser={registeredUser}
-        onRegisterUser={(username, role) => {
-          setRegisteredUser({ username, role });
-          setActiveView(role);
-          addToast(`Cuenta @${username} creada exitosamente`, "success");
-        }}
-      />
     </div>
   );
+
+  if (showOnboarding) {
+    return (
+      <div className="min-h-screen w-full bg-gradient-to-tr from-slate-900 via-slate-955 to-emerald-950 text-slate-100 flex items-center justify-center p-4 antialiased select-none font-sans transition-colors duration-200">
+        <div className="max-w-md w-full bg-slate-900/60 backdrop-blur-xl border border-slate-800 rounded-3xl p-6 shadow-2xl flex flex-col gap-5 text-center animate-scale-up">
+          
+          <div className="flex flex-col items-center gap-2">
+            <div className="p-3 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-2xl text-slate-950 shadow-lg shadow-emerald-500/25 transform transition-transform hover:rotate-6">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2.5" stroke="currentColor" className="w-8 h-8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-2xl font-extrabold bg-gradient-to-r from-emerald-400 to-teal-200 bg-clip-text text-transparent tracking-tight leading-none">
+                Beauchef Eats
+              </h1>
+              <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mt-1.5 font-mono">
+                Mapa de Comida FCFM
+              </p>
+            </div>
+          </div>
+
+          <p className="text-[11px] text-slate-400 leading-relaxed px-4">
+            Bienvenido al portal centralizado de alimentación para la comunidad de Beauchef.
+          </p>
+
+          {/* Onboarding Tabs */}
+          <div className="flex bg-slate-950/60 p-1 rounded-2xl border border-slate-800 gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={() => setOnboardingTab('login')}
+              className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all ${
+                onboardingTab === 'login'
+                  ? 'bg-slate-900 border border-slate-800 text-emerald-400 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-400'
+              }`}
+            >
+              Iniciar Sesión
+            </button>
+            <button
+              type="button"
+              onClick={() => setOnboardingTab('register')}
+              className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all ${
+                onboardingTab === 'register'
+                  ? 'bg-slate-900 border border-slate-800 text-emerald-400 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-400'
+              }`}
+            >
+              Registrarse
+            </button>
+          </div>
+
+          {onboardingTab === 'login' ? (
+            <div className="flex flex-col gap-3 mt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setRegisteredUser({ 
+                    username: 'comensal_demo', 
+                    role: 'comensal', 
+                    nombre: 'Comensal', 
+                    apellido: 'Demo', 
+                    correo: 'comensal@fcfm.cl',
+                    preferencias: 'Ninguna'
+                  });
+                  setActiveView('comensal');
+                  setShowOnboarding(false);
+                }}
+                className="group p-3 bg-slate-950/60 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500/50 rounded-2xl flex items-center justify-between text-left transition-all duration-300 active:scale-[0.98] shadow-sm"
+              >
+                <div className="flex items-center space-x-3">
+                  <span className="text-xl p-2 bg-emerald-950/40 rounded-xl group-hover:scale-110 transition-transform">🍔</span>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-200">Iniciar Sesión Comensal</h4>
+                    <p className="text-[8.5px] text-slate-500 leading-none mt-1">Busca comida, marca favoritos y escribe reseñas.</p>
+                  </div>
+                </div>
+                <span className="text-slate-600 group-hover:text-emerald-400 transition-colors text-xs">➔</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setRegisteredUser({ 
+                    username: 'vendedor_demo', 
+                    role: 'vendedor',
+                    nombreLocatario: 'Vendedor Demo',
+                    correo: 'vendedor@fcfm.cl',
+                    rut: '12.345.678-9',
+                    telefono: '+56912345678'
+                  });
+                  setActiveView('vendedor');
+                  setShowOnboarding(false);
+                }}
+                className="group p-3 bg-slate-950/60 hover:bg-slate-900 border border-slate-800 hover:border-emerald-500/50 rounded-2xl flex items-center justify-between text-left transition-all duration-300 active:scale-[0.98] shadow-sm"
+              >
+                <div className="flex items-center space-x-3">
+                  <span className="text-xl p-2 bg-amber-950/40 rounded-xl group-hover:scale-110 transition-transform">🏪</span>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-200">Iniciar Sesión Vendedor</h4>
+                    <p className="text-[8.5px] text-slate-500 leading-none mt-1">Gestiona tu local, cambia el stock y abre tu menú.</p>
+                  </div>
+                </div>
+                <span className="text-slate-600 group-hover:text-emerald-400 transition-colors text-xs">➔</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setRegisteredUser(null);
+                  setActiveView('invitado');
+                  setShowOnboarding(false);
+                }}
+                className="group p-3 bg-slate-950/40 hover:bg-slate-900/50 border border-slate-800 hover:border-slate-700/50 rounded-2xl flex items-center justify-between text-left transition-all duration-300 active:scale-[0.98] shadow-sm"
+              >
+                <div className="flex items-center space-x-3">
+                  <span className="text-xl p-2 bg-slate-900/40 rounded-xl group-hover:scale-110 transition-transform">👁️</span>
+                  <div>
+                    <h4 className="text-xs font-black text-slate-300">Entrar sin iniciar sesión (Invitado)</h4>
+                    <p className="text-[8.5px] text-slate-500 leading-none mt-1">Explora locales y lee reseñas de la comunidad.</p>
+                  </div>
+                </div>
+                <span className="text-slate-600 group-hover:text-emerald-400 transition-colors text-xs">➔</span>
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3 text-left max-h-[380px] overflow-y-auto pr-1">
+              <div className="flex bg-slate-950/40 p-0.5 rounded-xl border border-slate-850 gap-0.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setRegRole('comensal')}
+                  className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${
+                    regRole === 'comensal'
+                      ? 'bg-emerald-500 text-slate-950 font-black shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Comensal
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRegRole('vendedor')}
+                  className={`flex-1 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all ${
+                    regRole === 'vendedor'
+                      ? 'bg-emerald-500 text-slate-950 font-black shadow-sm'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  Vendedor
+                </button>
+              </div>
+
+              {regRole === 'comensal' ? (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!comNombre.trim() || !comCorreo.trim()) return;
+                    setRegisteredUser({
+                      username: comCorreo.split('@')[0],
+                      role: 'comensal',
+                      nombre: comNombre.trim(),
+                      apellido: comApellido.trim(),
+                      correo: comCorreo.trim(),
+                      preferencias: comPreferencia
+                    });
+                    setActiveView('comensal');
+                    setShowOnboarding(false);
+                    addToast("Registro exitoso. ¡Bienvenido!", "success");
+                  }}
+                  className="flex flex-col gap-2.5 mt-1"
+                >
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[8px] text-slate-400 uppercase tracking-widest font-extrabold block mb-1">Nombre</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Juan"
+                        value={comNombre}
+                        onChange={(e) => setComNombre(e.target.value)}
+                        className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[8px] text-slate-400 uppercase tracking-widest font-extrabold block mb-1">Apellido</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Perez"
+                        value={comApellido}
+                        onChange={(e) => setComApellido(e.target.value)}
+                        className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="text-[8px] text-slate-400 uppercase tracking-widest font-extrabold block mb-1">Correo Institucional</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="juan.perez@ing.uchile.cl"
+                      value={comCorreo}
+                      onChange={(e) => setComCorreo(e.target.value)}
+                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[8px] text-slate-400 uppercase tracking-widest font-extrabold block mb-1">Contraseña</label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={comPassword}
+                      onChange={(e) => setComPassword(e.target.value)}
+                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[8px] text-slate-400 uppercase tracking-widest font-extrabold block mb-1">Preferencia Alimentaria</label>
+                    <select
+                      value={comPreferencia}
+                      onChange={(e) => setComPreferencia(e.target.value)}
+                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 font-bold transition-colors"
+                    >
+                      <option value="Ninguna">Ninguna / Todo</option>
+                      <option value="Vegana">Vegana</option>
+                      <option value="Vegetariana">Vegetariana</option>
+                      <option value="Sin Gluten">Sin Gluten</option>
+                      <option value="Apto para Celíacos">Apto para Celíacos</option>
+                      <option value="Hipocalórica">Hipocalórica</option>
+                    </select>
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full py-2.5 mt-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black rounded-xl text-xs shadow-md transition-all active:scale-[0.98] hover:opacity-95 text-center cursor-pointer"
+                  >
+                    Registrarse e Ingresar
+                  </button>
+                </form>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!venNombre.trim() || !venCorreo.trim() || !venRut.trim()) return;
+                    setRegisteredUser({
+                      username: venCorreo.split('@')[0],
+                      role: 'vendedor',
+                      nombreLocatario: venNombre.trim(),
+                      correo: venCorreo.trim(),
+                      rut: venRut.trim(),
+                      telefono: venTelefono.trim()
+                    });
+                    setActiveView('vendedor');
+                    setShowOnboarding(false);
+                    addToast("Registro de Locatario exitoso. ¡Bienvenido!", "success");
+                  }}
+                  className="flex flex-col gap-2.5 mt-1"
+                >
+                  <div>
+                    <label className="text-[8px] text-slate-400 uppercase tracking-widest font-extrabold block mb-1">Nombre del Locatario</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Pedro Gómez"
+                      value={venNombre}
+                      onChange={(e) => setVenNombre(e.target.value)}
+                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[8px] text-slate-400 uppercase tracking-widest font-extrabold block mb-1">Correo Electrónico</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="pedro.gomez@gmail.com"
+                      value={venCorreo}
+                      onChange={(e) => setVenCorreo(e.target.value)}
+                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[8px] text-slate-400 uppercase tracking-widest font-extrabold block mb-1">Contraseña</label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={venPassword}
+                      onChange={(e) => setVenPassword(e.target.value)}
+                      className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[8px] text-slate-400 uppercase tracking-widest font-extrabold block mb-1">RUT / Identificación</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="18.765.432-1"
+                        value={venRut}
+                        onChange={(e) => setVenRut(e.target.value)}
+                        className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[8px] text-slate-400 uppercase tracking-widest font-extrabold block mb-1">Teléfono</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="+56998765432"
+                        value={venTelefono}
+                        onChange={(e) => setVenTelefono(e.target.value)}
+                        className="w-full text-xs p-2.5 rounded-xl bg-white border border-slate-300 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 text-slate-900 transition-colors font-mono"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="submit"
+                    className="w-full py-2.5 mt-2 bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 font-black rounded-xl text-xs shadow-md transition-all active:scale-[0.98] hover:opacity-95 text-center cursor-pointer"
+                  >
+                    Registrarse e Ingresar
+                  </button>
+                </form>
+              )}
+            </div>
+          )}
+
+          <div className="text-[8px] text-slate-600 font-mono mt-4">
+            DCC FCFM • Evaluación de Proyectos
+          </div>
+
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-slate-900 flex items-center justify-center font-sans antialiased transition-colors duration-200">

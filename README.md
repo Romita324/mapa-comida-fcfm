@@ -38,7 +38,7 @@ Una vez que el comando finalice, abre tu navegador e ingresa a la dirección loc
 Este MVP V2 implementa características avanzadas para el ecosistema de la comunidad:
 
 ### 1. Perfiles de Usuario Estrictos
-- **Comensal (Estudiante/Funcionario/Profesor)**: Busca locales en el mapa, aplica filtros de distancia y categorías, visualiza si aceptan convenio JUNAEB, reporta comentarios trolls, guarda favoritos en su cuenta y postula para convertirse en moderador.
+- **Comensal (Miembro de la comunidad: estudiante, funcionario, profesor)**: Busca locales en el mapa, aplica filtros de distancia y categorías, visualiza si aceptan convenio JUNAEB, reporta comentarios trolls, guarda favoritos en su cuenta y postula para convertirse en moderador.
 - **Vendedor (Locatario)**: Dispone de un selector de local para gestionar la disponibilidad. Puede solicitar el ingreso de un nuevo local mediante un portal integrado (esperando aprobación del Admin) y, una vez aprobado, tiene control total sobre el estado operativo (Abierto / Cerrado) y la disponibilidad de stock en caliente.
 - **Administrador (Moderador)**: Panel dedicado a resolver denuncias de trolls (con opción de banear usuarios y borrar comentarios), aprobar postulaciones de nuevos locales de vendedores (añadiéndolos al mapa reactivamente) e integrar solicitudes de comensales a moderadores. Cuenta con una consola terminal con un **Log de Auditoría Inmutable** para asegurar la transparencia anti-colusión.
 - **Invitado**: Visualiza de solo lectura el mapa interactivo y los locales georeferenciados. Se le inhabilitan o restringen las opciones de favoritos, postulación a moderador y denuncias.
